@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from PIL import Image, ImageDraw, ImageFilter
+import os
 
 Letters = []
 letters = []
@@ -97,23 +98,18 @@ for letter in Letters:
         else:
             resize_height = target_height
             resize_width = round(resize_height / im_ratio)
-
         background = Image.new('RGBA', (target_width, target_height), (255, 255, 255, 255))
         offset = (round((target_width - im.width) / 2), round((target_height - im.height) / 2))
         background.paste(im, offset)
         background = np.array(background)
         background=cv2.cvtColor(background, cv2.COLOR_BGR2RGB)
-        #background = Image.arra
         Letters_pad.append(background)
-        #boxes.append(background)
 
 
     resize_with_pad(letter_not_array, w + 40, h + 40)
 
 gray = cv2.imread(filename = 'letters_cn.png', flags = cv2.IMREAD_GRAYSCALE)
-
-ret, binary = cv2.threshold(gray, 100, 255,
-                            cv2.THRESH_OTSU)
+ret, binary = cv2.threshold(gray, 100, 255,                          cv2.THRESH_OTSU)
 inverted_binary = ~binary
 contours, hierarchy = cv2.findContours(inverted_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -134,14 +130,20 @@ for c in contours:
             if ((x >= x2) and (y >= y2) and ((x + w) <= (x2 + w2)) and ((y + h) <= (y2 + h2))):
                 g.pop()
 
-boxes = []
+try:
+    os.mkdir('found')
+except FileExistsError:
+    pass
+try:
+    os.mkdir('found_pad')
+except FileExistsError:
+    pass
 for c in g:
     x, y, w, h = cv2.boundingRect(c)
     k=k+1
     im = gray[y-5:y + h+5, x-5:x + w+5]
-    #cv2.imshow('Img', im)
-    cv2.imwrite('found_letter_' + str(k) + '.png', im)
-    im2 = cv2.imread('found_letter_' + str(k) + '.png')
+    cv2.imwrite('found/found_letter_' + str(k) + '.png', im)
+    im2 = cv2.imread('found/found_letter_' + str(k) + '.png')
     im = Image.fromarray(im)
 
     def resize_with_pad(im, target_width, target_height):
@@ -149,29 +151,22 @@ for c in g:
         target_ratio = target_height / target_width
         im_ratio = im.height / im.width
         if target_ratio > im_ratio:
-            # It must be fixed by width
             resize_width = target_width - im.width
             resize_height = target_height - im.height
         else:
-            # Fixed by height
             resize_height = target_height
             resize_width = round(resize_height / im_ratio)
 
         background = Image.new('RGBA', (target_width, target_height), (255, 255, 255, 255))
         offset = (round((target_width - im.width) / 2), round((target_height - im.height) / 2))
         background.paste(im, offset)
-        background.save('found_letter_pad_' + str(k) + '.png')
-        boxes.append(background)
-        #return background.convert('RGB')
+        background.save('found_pad/found_letter_pad_' + str(k) + '.png')
 
         z = 0
         for j in Letters_pad:
-            print("z ", z)
-            print("k ", k)
-            #print("letter", letters[])
-            i = cv2.imread('found_letter_pad_' + str(k) + '.png')
+            i = cv2.imread('found_pad/found_letter_pad_' + str(k) + '.png')
 
-            print("kaze")
+            #KAZE
             kaze = cv2.KAZE_create()
             keypoints1, descriptors1 = kaze.detectAndCompute(i, None)
             keypoints2, descriptors2 = kaze.detectAndCompute(j, None)
@@ -198,7 +193,6 @@ for c in g:
                         now = m
                         if (max.distance > now.distance):
                             max = now
-                    # print(max.distance)
                     if ((max.distance <= 0.091)):
                         output3 = cv2.drawMatches(img1=i, keypoints1=keypoints1, img2=j,
                                                   keypoints2=keypoints2, matches1to2=matches2, outImg=None,
@@ -208,8 +202,7 @@ for c in g:
                         #cv2.imwrite('image_kaze_best_' + str(z) + " " + str(k) + ' j.jpg', j)
 
 
-
-            print("brisk")
+            #BRISK
             BRISK = cv2.BRISK_create()
             keypoints1, descriptors1 = BRISK.detectAndCompute(i, None)
             keypoints2, descriptors2 = BRISK.detectAndCompute(j, None)
@@ -248,10 +241,7 @@ for c in g:
                         #cv2.imwrite('image_brisk_best_' + str(z) + " " + str(k) + ' i.jpg', i)
                         #cv2.imwrite('image_brisk_best_' + str(z) + " " + str(k) + ' j.jpg', j)
 
-
             z = z + 1
         return background.convert('RGB')
-
-
 
     resize_with_pad(im, w + 40, h + 40)
