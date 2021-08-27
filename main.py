@@ -1,7 +1,8 @@
 import numpy as np
 import cv2
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image
 import os
+import glob
 import letters_import
 import operator
 
@@ -11,21 +12,31 @@ Alphabets = []
 Alphabets.append(letters_import.Arial_Letters)
 Alphabets.append(letters_import.Times_NR_Letters)
 Alphabets.append(letters_import.Courier_N_Letters)
+Alphabets.append(letters_import.Clarendon_Letters)
+Alphabets.append(letters_import.Comic_S_Letters)
 
-alphabets = []
-alphabets.append("Arial_Letters")
-alphabets.append("Times_NR_Letters")
-alphabets.append("Courier_N_Letters")
+Alphabet_Letters = letters_import.letters
+
+alphabets_names = []
+alphabets_names.append("Arial_Letters")
+alphabets_names.append("Times_NR_Letters")
+alphabets_names.append("Courier_N_Letters")
+alphabets_names.append("Clarendon_Letters")
+alphabets_names.append("Comic_S_Letters")
 
 names = []
 
 Alphabets_pad = []
-Arial_Letters = []
-Alphabets_pad.append(Arial_Letters)
-Times_NR_Letters = []
-Alphabets_pad.append(Times_NR_Letters)
-Courier_N_Letters = []
-Alphabets_pad.append(Courier_N_Letters)
+Arial_Letters_no_pad = []
+Alphabets_pad.append(Arial_Letters_no_pad)
+Times_NR_Letters_no_pad = []
+Alphabets_pad.append(Times_NR_Letters_no_pad)
+Courier_N_Letters_no_pad = []
+Alphabets_pad.append(Courier_N_Letters_no_pad)
+Comic_S_Letters_no_pad = []
+Alphabets_pad.append(Comic_S_Letters_no_pad)
+Clarendon_Letters_no_pad = []
+Alphabets_pad.append(Clarendon_Letters_no_pad)
 
 '''
 name0 = "_pad"
@@ -89,22 +100,31 @@ for c in contours:
             if ((x >= x2) and (y >= y2) and ((x + w) <= (x2 + w2)) and ((y + h) <= (y2 + h2))):
                 found_letter.pop()
 
+program_output = []
 try:
     os.mkdir('found')
 except FileExistsError:
-    pass
+    files = glob.glob('/YOUR/PATH/*')
+    for f in files:
+        os.remove(f)
 try:
     os.mkdir('found_pad')
 except FileExistsError:
-    pass
+    files = glob.glob('/YOUR/PATH/*')
+    for f in files:
+        os.remove(f)
 try:
     os.mkdir('kaze')
 except FileExistsError:
-    pass
+    files = glob.glob('/YOUR/PATH/*')
+    for f in files:
+        os.remove(f)
 try:
     os.mkdir('brisk')
 except FileExistsError:
-    pass
+    files = glob.glob('/YOUR/PATH/*')
+    for f in files:
+        os.remove(f)
 for c in found_letter:
     x, y, w, h = cv2.boundingRect(c)
     k=k+1
@@ -129,11 +149,37 @@ for c in found_letter:
         background.paste(im, offset)
         background.save('found_pad/found_letter_pad_' + str(k) + '.png')
 
+        pic = cv2.imread('found_pad/found_letter_pad_' + str(k) + '.png')
+        #cv2.imshow("im", pic)
+        #cv2.waitKey(0)
+
         z = 0
         Distances_kaze = []
+        Distances_kaze_a = []
+        Distances_kaze.append(Distances_kaze_a)
+        Distances_kaze_tnr = []
+        Distances_kaze.append(Distances_kaze_tnr)
+        Distances_kaze_cn = []
+        Distances_kaze.append(Distances_kaze_cn)
+        Distances_kaze_c = []
+        Distances_kaze.append(Distances_kaze_c)
+        Distances_kaze_cs = []
+        Distances_kaze.append(Distances_kaze_cs)
         Distances_brisk = []
+        Distances_brisk_a = []
+        Distances_brisk.append(Distances_brisk_a)
+        Distances_brisk_tnr = []
+        Distances_brisk.append(Distances_brisk_tnr)
+        Distances_brisk_cn = []
+        Distances_brisk.append(Distances_brisk_cn)
+        Distances_brisk_c = []
+        Distances_brisk.append(Distances_brisk_c)
+        Distances_brisk_cs = []
+        Distances_brisk.append(Distances_brisk_cs)
+
         for iterator in range(26):
-            print(chr(iterator+97))
+            #print(chr(iterator+97))
+            alphabets_iterator = 0
             for alphabet in Alphabets_pad:
                 i = cv2.imread('found_pad/found_letter_pad_' + str(k) + '.png')
                 j = alphabet[iterator]
@@ -159,20 +205,34 @@ for c in found_letter:
                         if m.distance <= ratio_thresh * n.distance:
                             good_matches.append(m)
                     if (len(matches2) > 0):
-                        max = matches2[0]
+                        min_distance = matches2[0]
                         for m in matches2:
-                            now = m
-                            if (max.distance > now.distance):
-                                max = now
-                        if ((max.distance <= 0.091)):
+                            current_distance = m
+                            if (min_distance.distance > current_distance.distance):
+                                min_distance = current_distance
+                        if ((min_distance.distance <= 0.091)):
                             output3 = cv2.drawMatches(img1=i, keypoints1=keypoints1, img2=j,
                                                       keypoints2=keypoints2, matches1to2=matches2, outImg=None,
                                                       flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
                             cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + '.jpg', output3)
                             cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' i.jpg', i)
                             cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' j.jpg', j)
-                    Distances_kaze.append(max.distance)
-                    #print(max.distance)
+                    def key_sort(e):
+                        return e.distance
+                    matches2.sort(key= key_sort)
+                    sum_dist = 0
+                    iter_check = 0
+                    for sum_iter in range(10):
+                        try: sum_dist = sum_dist + matches2[sum_iter].distance
+                        except: pass
+                        iter_check = iter_check + 1
+                    avg_dist = sum_dist / iter_check
+                    #Distances_kaze.append(min_distance.distance)
+                    Distances_kaze[alphabets_iterator].append(avg_dist)
+                    #print("kaze")
+                    #print(alphabets_names[alphabets_iterator])
+                    #print(min_distance.distance)
+                    #print("najlepsze dopasowanie",Alphabet_Letters[iterator])
 
                 # BRISK
                 BRISK = cv2.BRISK_create()
@@ -193,32 +253,81 @@ for c in found_letter:
                     matches = FLANN.knnMatch(queryDescriptors=descriptors1, trainDescriptors=descriptors2, k=2)
                     ratio_thresh = 0.7
                     good_matches = []
-                    matches2 = []
+                    matches3 = []
                     for m, n in matches:
-                        matches2.append(m)
+                        matches3.append(m)
                         if m.distance < ratio_thresh * n.distance:
                             good_matches.append(m)
-                    if (len(matches2) > 0):
-                        max = matches2[0]
-                        for m in matches2:
-                            now = m
-                            if (max.distance > now.distance):
-                                max = now
+                    if (len(matches3) > 0):
+                        min_distance = matches3[0]
+                        for m in matches3:
+                            current_distance = m
+                            if (min_distance.distance > current_distance.distance):
+                                min_distance = current_distance
                         # print(max.distance)
-                        if ((max.distance <= 490)):
+                        if ((min_distance.distance <= 490)):
                             output3 = cv2.drawMatches(img1=i, keypoints1=keypoints1, img2=j, keypoints2=keypoints2,
-                                                      matches1to2=matches2, outImg=None,
+                                                      matches1to2=matches3, outImg=None,
                                                       flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
                             cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + '.jpg', output3)
                             cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' i.jpg', i)
                             cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' j.jpg', j)
-                    Distances_brisk.append(max.distance)
+                    '''
+                    def key_sort(e):
+                        return e.distance
+                    matches3.sort(key= key_sort)
+                    sum_dist = 0
+                    for sum_iter in range(10):
+                        for m in matches3:
+                            sum_dist = sum_dist + m.distance
+                    avg_dist = sum_dist / 10
+                    Distances_brisk.append(avg_dist)
+                    '''
+                    def key_sort(e):
+                        return e.distance
+                    matches3.sort(key= key_sort)
+                    sum_dist = 0
+                    iter_check = 0
+                    for sum_iter in range(10):
+                        try: sum_dist = sum_dist + matches3[sum_iter].distance
+                        except: pass
+                        iter_check = iter_check + 1
+                    avg_dist = sum_dist / iter_check
+                    #print("letter iter", iterator, "alphabet iterator", alphabets_iterator, "avg distance",avg_dist)
+                    #Distances_kaze.append(min_distance.distance)
+                    Distances_brisk[alphabets_iterator].append(avg_dist)
+                    #print("brisk")
+                    #print(alphabets_names[alphabets_iterator])
+                    #print(min_distance.distance)
+                    #print("najlepsze dopasowanie", Alphabet_Letters[matches2.index(min_distance)])
+                alphabets_iterator = alphabets_iterator + 1
 
-            Distances_kaze.sort()
-            Distances_brisk.sort()
-            print(Distances_kaze[0])
-            print(Distances_brisk[0])
+            #Distances_kaze.sort()
+            #min(Distances_kaze)
+            #print(Distances_kaze[0].index(min(Distances_kaze_a)))
+            #print(len(Distances_kaze[0]))
+            #print(Distances_kaze[1].index(min(Distances_kaze_tnr)))
+            #print(len(Distances_kaze[1]))
+            #print(Distances_kaze[2].index(min(Distances_kaze_cn)))
+            #print(len(Distances_kaze[2]))
+            #print(Distances_kaze[3].index(min(Distances_kaze_c)))
+            #print(len(Distances_kaze[3]))
+            #print(Distances_kaze[4].index(min(Distances_kaze_cs)))
+            #print(len(Distances_kaze[4]))
+
+            #print("najlepsze dopasowanie",Alphabet_Letters[Distances_kaze.index(min(Distances_kaze))])
+            #Distances_brisk.sort()
+            #min(Distances_brisk)
+            #print(Distances_brisk.index(min(Distances_brisk)))
+            if(iterator == 25):
+                program_output.append((Alphabet_Letters[Distances_brisk[0].index(min(Distances_brisk_a))]))
+            #print(len(Distances_brisk[0]))
+            #print(Distances_kaze[0])
+            #print(Distances_brisk[0])
             z = z + 1
+
         return background.convert('RGB')
 
     resize_with_pad(im, w + 40, h + 40)
+for letter_x in range(len(program_output)):
+    print(program_output[letter_x])
