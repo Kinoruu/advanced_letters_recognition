@@ -112,10 +112,18 @@ for alphabet in Alphabets_pad:
         iterator_full = iterator_full + 1
     iterator_empty = iterator_empty + 1
 
-gray = cv2.imread(filename = 'letters_cn.png', flags = cv2.IMREAD_GRAYSCALE)
-ret, binary = cv2.threshold(gray, 100, 255,                          cv2.THRESH_OTSU)
-inverted_binary = ~binary
-contours, hierarchy = cv2.findContours(inverted_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+gray = cv2.imread(filename = 'unknown.png', flags = cv2.IMREAD_GRAYSCALE) #1
+#ret, binary = cv2.threshold(gray, 100, 255, cv2.THRESH_OTSU)  #1
+#_, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY) #2
+#inverted_binary = ~binary   #1
+#contours, hierarchy = cv2.findContours(inverted_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  #1
+#contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) #2
+
+img = cv2.imread('unknown.PNG')
+imgGry = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+ret, thrash = cv2.threshold(imgGry, 240 , 255, cv2.CHAIN_APPROX_NONE)
+contours , hierarchy = cv2.findContours(thrash, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+
 
 k = 0
 found_letter = []
@@ -159,7 +167,7 @@ program_output = []
 for c in found_letter:
     x, y, w, h = cv2.boundingRect(c)
     k=k+1
-    im = gray[y-5:y + h+5, x-5:x + w+5]
+    im = gray[y-1:y + h+1, x-1:x + w+1]
     cv2.imwrite('found/found_letter_' + str(k) + '.png', im)
     im2 = cv2.imread('found/found_letter_' + str(k) + '.png')
     im = Image.fromarray(im)
@@ -351,26 +359,47 @@ for c in found_letter:
                 alphabets_iterator = alphabets_iterator + 1
 
             if(iterator == 25):
-                pre_output_0.append((Alphabet_Letters[Distances_brisk[0].index(min(Distances_brisk_a))]))
-                pre_output_1.append((Alphabet_Letters[Distances_brisk[1].index(min(Distances_brisk_tnr))]))
-                pre_output_2.append((Alphabet_Letters[Distances_brisk[2].index(min(Distances_brisk_cn))]))
-                pre_output_3.append((Alphabet_Letters[Distances_brisk[3].index(min(Distances_brisk_c))]))
-                pre_output_4.append((Alphabet_Letters[Distances_brisk[4].index(min(Distances_brisk_cs))]))
-                pre_output_5.append((Alphabet_Letters[Distances_kaze[0].index(min(Distances_kaze_a))]))
-                pre_output_6.append((Alphabet_Letters[Distances_kaze[1].index(min(Distances_kaze_tnr))]))
-                pre_output_7.append((Alphabet_Letters[Distances_kaze[2].index(min(Distances_kaze_cn))]))
-                pre_output_8.append((Alphabet_Letters[Distances_kaze[3].index(min(Distances_kaze_c))]))
-                pre_output_9.append((Alphabet_Letters[Distances_kaze[4].index(min(Distances_kaze_cs))]))
-                pre_output_10.append((Alphabet_Letters[Distances_brisk[5].index(min(Distances_brisk_a_i))]))
-                pre_output_11.append((Alphabet_Letters[Distances_brisk[6].index(min(Distances_brisk_tnr_i))]))
-                pre_output_12.append((Alphabet_Letters[Distances_brisk[7].index(min(Distances_brisk_cn_i))]))
-                pre_output_13.append((Alphabet_Letters[Distances_brisk[8].index(min(Distances_brisk_c_i))]))
-                pre_output_14.append((Alphabet_Letters[Distances_brisk[9].index(min(Distances_brisk_cs_i))]))
-                pre_output_15.append((Alphabet_Letters[Distances_kaze[5].index(min(Distances_kaze_a_i))]))
-                pre_output_16.append((Alphabet_Letters[Distances_kaze[6].index(min(Distances_kaze_tnr_i))]))
-                pre_output_17.append((Alphabet_Letters[Distances_kaze[7].index(min(Distances_kaze_cn_i))]))
-                pre_output_18.append((Alphabet_Letters[Distances_kaze[8].index(min(Distances_kaze_c_i))]))
-                pre_output_19.append((Alphabet_Letters[Distances_kaze[9].index(min(Distances_kaze_cs_i))]))
+                try:pre_output_0.append((Alphabet_Letters[Distances_brisk[0].index(min(Distances_brisk_a))]))
+                except: pass
+                try:pre_output_1.append((Alphabet_Letters[Distances_brisk[1].index(min(Distances_brisk_tnr))]))
+                except:
+                    pass
+                try:pre_output_2.append((Alphabet_Letters[Distances_brisk[2].index(min(Distances_brisk_cn))]))
+                except: pass
+                try:pre_output_3.append((Alphabet_Letters[Distances_brisk[3].index(min(Distances_brisk_c))]))
+                except: pass
+                try:pre_output_4.append((Alphabet_Letters[Distances_brisk[4].index(min(Distances_brisk_cs))]))
+                except: pass
+                try:pre_output_5.append((Alphabet_Letters[Distances_kaze[0].index(min(Distances_kaze_a))]))
+                except: pass
+                try:pre_output_6.append((Alphabet_Letters[Distances_kaze[1].index(min(Distances_kaze_tnr))]))
+                except: pass
+                try:pre_output_7.append((Alphabet_Letters[Distances_kaze[2].index(min(Distances_kaze_cn))]))
+                except: pass
+                try:pre_output_8.append((Alphabet_Letters[Distances_kaze[3].index(min(Distances_kaze_c))]))
+                except: pass
+                try:pre_output_9.append((Alphabet_Letters[Distances_kaze[4].index(min(Distances_kaze_cs))]))
+                except: pass
+                try:pre_output_10.append((Alphabet_Letters[Distances_brisk[5].index(min(Distances_brisk_a_i))]))
+                except: pass
+                try:pre_output_11.append((Alphabet_Letters[Distances_brisk[6].index(min(Distances_brisk_tnr_i))]))
+                except: pass
+                try:pre_output_12.append((Alphabet_Letters[Distances_brisk[7].index(min(Distances_brisk_cn_i))]))
+                except: pass
+                try:pre_output_13.append((Alphabet_Letters[Distances_brisk[8].index(min(Distances_brisk_c_i))]))
+                except: pass
+                try:pre_output_14.append((Alphabet_Letters[Distances_brisk[9].index(min(Distances_brisk_cs_i))]))
+                except: pass
+                try:pre_output_15.append((Alphabet_Letters[Distances_kaze[5].index(min(Distances_kaze_a_i))]))
+                except: pass
+                try:pre_output_16.append((Alphabet_Letters[Distances_kaze[6].index(min(Distances_kaze_tnr_i))]))
+                except: pass
+                try:pre_output_17.append((Alphabet_Letters[Distances_kaze[7].index(min(Distances_kaze_cn_i))]))
+                except: pass
+                try:pre_output_18.append((Alphabet_Letters[Distances_kaze[8].index(min(Distances_kaze_c_i))]))
+                except: pass
+                try:pre_output_19.append((Alphabet_Letters[Distances_kaze[9].index(min(Distances_kaze_cs_i))]))
+                except: pass
             z = z + 1
 
         return background.convert('RGB')
@@ -462,6 +491,7 @@ print()
 print(len(Final_output))
 print()
 print()
+Final_output.reverse()
 text_file = open("ocered_text.txt","w")
 text_file = open("ocered_text.txt","a")
 for letter_x in range(len(Final_output)):
