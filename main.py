@@ -5,6 +5,7 @@ import os
 import glob
 import letters_import
 import operator
+import time
 ######################################################## creating or cleaning directories
 try:
     os.mkdir('found')
@@ -110,10 +111,29 @@ for alphabet in Alphabets_pad:
         iterator_full = iterator_full + 1
     iterator_empty = iterator_empty + 1
 ######################################################## searching all shapes in the input image
-gray = cv2.imread(filename = 'letters_cn.png', flags = cv2.IMREAD_GRAYSCALE)
-ret, binary = cv2.threshold(gray, 100, 255,                          cv2.THRESH_OTSU)
+gray = cv2.imread(filename = 'test2.png', flags = cv2.IMREAD_GRAYSCALE)
+gray = np.array(gray)
+height, width = gray.shape
+white = 0
+for h in range(height):
+    for w in range(width):
+        if(gray[h,w] == [255]):
+            white = white + 1
+if(white < (height * width) / 2):
+    gray = cv2.cv2.bitwise_not(gray)
+ret, binary = cv2.threshold(gray, 245, 255, cv2.THRESH_OTSU)
 inverted_binary = ~binary
 contours, hierarchy = cv2.findContours(inverted_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+'''
+for shapes in contours:
+    shapes = Image.fromarray(shapes)
+    height, width = shapes.shape
+
+    for h in range(height):
+        for w in range(width):
+            if(shapes[h,w] == shapes):
+                shapes[h,w] = [255,255,255]
+'''
 ######################################################## deleting shapes included in bigger ones
 k = 0
 found_letter = []
@@ -132,6 +152,7 @@ for c in contours:
             if ((x >= x2) and (y >= y2) and ((x + w) <= (x2 + w2)) and ((y + h) <= (y2 + h2))):
                 found_letter.pop()
 number_of_found_letters = len(found_letter) # number of found shapes
+print("OCR have found ", number_of_found_letters, " letters")
 ######################################################## creating vectors for output
 pre_output_0 = []
 pre_output_1 = []
@@ -159,7 +180,7 @@ program_output = []
 for c in found_letter:
     x, y, w, h = cv2.boundingRect(c)
     k=k+1
-    im = gray[y-1:y + h+1, x-1:x + w+1]      # cutting shapes from input image with 1 pixel pad on every side
+    im = gray[y-5:y + h+5, x-5:x + w+5]      # cutting shapes from input image with 1 pixel pad on every side
     cv2.imwrite('found/found_letter_' + str(k) + '.png', im)
     im2 = cv2.imread('found/found_letter_' + str(k) + '.png')
     im = Image.fromarray(im)
@@ -255,9 +276,9 @@ for c in found_letter:
                             output3 = cv2.drawMatches(img1=i, keypoints1=keypoints1, img2=j,
                                                       keypoints2=keypoints2, matches1to2=matches2, outImg=None,
                                                       flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-                            #cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + '.jpg', output3) #
-                            #cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' i.jpg', i)     # saving image with drawn matches
-                            #cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' j.jpg', j)     #
+                            cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + '.jpg', output3) #
+                            cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' i.jpg', i)     # saving image with drawn matches
+                            cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' j.jpg', j)     #
                     def key_sort(e):
                         return e.distance
                     def geo_mean_overflow(iterable):
@@ -267,7 +288,7 @@ for c in found_letter:
                     sum_dist = 0
                     iter_check = 0
                     sum_dist_array = []
-                    for sum_iter in range(5):
+                    for sum_iter in range(2):
                         try:
                             sum_dist = sum_dist + matches2[sum_iter].distance    # mean distance calculating
                             sum_dist_array.append(matches2[sum_iter].distance)   # geometric mean calculating
@@ -310,9 +331,9 @@ for c in found_letter:
                             output3 = cv2.drawMatches(img1=i, keypoints1=keypoints1, img2=j, keypoints2=keypoints2,
                                                       matches1to2=matches3, outImg=None,
                                                       flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-                            #cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + '.jpg', output3) #
-                            #cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' i.jpg', i)     # saving image with drawn matches
-                            #cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' j.jpg', j)     #
+                            cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + '.jpg', output3) #
+                            cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' i.jpg', i)     # saving image with drawn matches
+                            cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' j.jpg', j)     #
                     def key_sort(e):
                         return e.distance
                     def geo_mean_overflow(iterable):
@@ -322,14 +343,14 @@ for c in found_letter:
                     sum_dist = 0
                     sum_dist_array = []
                     iter_check = 0
-                    for sum_iter in range(5):
+                    for sum_iter in range(2):
                         try:
                             sum_dist = sum_dist + matches3[sum_iter].distance   # mean distance calculating
-                            sum_dist_array.append(matches3[sum_iter].distance)  # gemetric mean calculating
+                            sum_dist_array.append(matches3[sum_iter].distance)  # geometric mean calculating
                             iter_check = iter_check + 1
                         except: pass
                     #avg_dist = sum_dist / iter_check                            # mean distance calculating
-                    avg_dist = geo_mean_overflow(sum_dist_array)                # gemetric mean calculating
+                    avg_dist = geo_mean_overflow(sum_dist_array)                # geometric mean calculating
                     #avg_dist = matches3[0].distance                             # minimum distance calculating
                     Distances_brisk[alphabets_iterator].append(avg_dist)
                 alphabets_iterator = alphabets_iterator + 1
@@ -419,7 +440,7 @@ for c in found_letter:
             z = z + 1
         return background.convert('RGB')
     resize_with_pad(im, w + 40, h + 40)
-    print(k, " z ", number_of_found_letters)
+    print(k, "from", number_of_found_letters)
 
 print()
 
@@ -457,17 +478,17 @@ for iterator_z in range(len(pre_output_0)):
         except:
             pass
 
-def most_frequent(List):  # seearching most frequent letter in all lines of complexity
+def most_frequent(List):  # searching most frequent letter in all lines of complexity
     return max(set(List), key = List.count)
 
 for semi in Semi_final_output:
     Final_output.append(most_frequent(semi))
 
-
 text_file = open("ocered_text.txt","w")
 text_file = open("ocered_text.txt","a")
 for letter_x in range(len(Final_output)):
     print(Final_output[letter_x], sep=' ', end='', flush=True)
+    text_file.write(Final_output[letter_x])
 print()
 Final_output.reverse()
 for letter_x in range(len(Final_output)):
