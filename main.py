@@ -281,7 +281,6 @@ for c in found_letter:
                     #avg_dist = matches2[0].distance                              # minimum distance calculating
                     #print("avg_dist= ", avg_dist)
                     Distances_kaze[alphabets_iterator].append(avg_dist)
-
                 # BRISK
                 BRISK = cv2.BRISK_create()
                 keypoints1, descriptors1 = BRISK.detectAndCompute(i, None)
