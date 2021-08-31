@@ -131,7 +131,6 @@ for c in contours:
             x2, y2, w2, h2 = cv2.boundingRect(d)
             if ((x >= x2) and (y >= y2) and ((x + w) <= (x2 + w2)) and ((y + h) <= (y2 + h2))):
                 found_letter.pop()
-
 number_of_found_letters = len(found_letter) # number of found shapes
 ######################################################## creating vectors for output
 pre_output_0 = []
