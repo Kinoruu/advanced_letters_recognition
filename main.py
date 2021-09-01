@@ -6,6 +6,8 @@ import os
 import letters_import
 # import operator
 # import time
+import random as rng
+import argparse
 
 # creating or cleaning directories
 try:
@@ -15,9 +17,21 @@ except FileExistsError:
         for f in files:
             os.unlink(os.path.join(root, f))
 try:
+    os.mkdir('found_v2')
+except FileExistsError:
+    for root, dirs, files in os.walk('found_v2'):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+try:
     os.mkdir('found_pad')
 except FileExistsError:
     for root, dirs, files in os.walk('found_pad'):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+try:
+    os.mkdir('found_pad_v2')
+except FileExistsError:
+    for root, dirs, files in os.walk('found_pad_v2'):
         for f in files:
             os.unlink(os.path.join(root, f))
 try:
@@ -30,6 +44,12 @@ try:
     os.mkdir('brisk')
 except FileExistsError:
     for root, dirs, files in os.walk('brisk'):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+try:
+    os.mkdir('segmentation')
+except FileExistsError:
+    for root, dirs, files in os.walk('segmentation'):
         for f in files:
             os.unlink(os.path.join(root, f))
 # flags and changeable elements
@@ -126,7 +146,8 @@ for alphabet in Alphabets_pad:
         iterator_full += 1
     iterator_empty += 1
 # searching all shapes in the input image
-gray = cv2.imread(filename='letters_cn.png', flags=cv2.IMREAD_GRAYSCALE)
+gray2 = cv2.imread(filename='test3.png')
+gray = cv2.imread(filename='test3.png', flags=cv2.IMREAD_GRAYSCALE)
 gray = np.array(gray)
 height, width = gray.shape
 white = 0
@@ -139,33 +160,131 @@ if white < (height * width) / 2:
 ret, binary = cv2.threshold(gray, threshold, 255, cv2.THRESH_OTSU)
 inverted_binary = ~binary
 contours, hierarchy = cv2.findContours(inverted_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-'''
-for shapes in contours:
-    shapes = Image.fromarray(shapes)
-    height, width = shapes.shape
 
-    for h in range(height):
-        for w in range(width):
-            if(shapes[h,w] == shapes):
-                shapes[h,w] = [255,255,255]
-'''
+
+
+def segmentation(gray2):  # image segmentation
+    rng.seed(12345)
+    try: gray2[np.all(gray2 == 255, axis=2)] = 0  # Change the background from white to black, it will help later to extract
+    except: gray2 = gray2
+    #cv2.imshow('Black Background Image', gray2)
+    cv2.imwrite('segmentation/Black Background Image.png', gray2)
+    #cv2.waitKey(0)
+    kernel = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]],
+                      dtype=np.float32)  # Kernel sharpening, approximation of second derivative
+    imgLaplacian = cv2.filter2D(gray2, cv2.CV_32F, kernel)  # do the laplacian filtering
+    sharp = np.float32(gray2)
+    imgResult = sharp - imgLaplacian
+    imgResult = np.clip(imgResult, 0, 255)  # convert back to 8bits gray scale
+    imgResult = imgResult.astype('uint8')
+    imgLaplacian = np.clip(imgLaplacian, 0, 255)
+    imgLaplacian = np.uint8(imgLaplacian)
+    #cv2.imshow('New Sharped Image', imgResult)
+    cv2.imwrite('segmentation/New Sharped Image.png', imgResult)
+    #cv2.waitKey(0)
+    bw = cv2.cvtColor(imgResult, cv2.COLOR_BGR2GRAY)  # Create binary image from source image
+    _, bw = cv2.threshold(bw, threshold, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    #cv2.imshow('Binary Image', bw)
+    cv2.imwrite('segmentation/Binary Image.png', bw)
+    #cv2.waitKey(0)
+    dist = cv2.distanceTransform(bw, cv2.DIST_L2, 3)  # Perform the distance transform algorithm
+    cv2.normalize(dist, dist, 0, 1.0, cv2.NORM_MINMAX)  # Normalize the distance image for range = {0.0, 1.0}
+    #cv2.imshow('Distance Transform Image', dist)
+    cv2.imwrite('segmentation/Distance Transform Image.png', dist)
+    #cv2.waitKey(0)
+    _, dist = cv2.threshold(dist, threshold, 255,
+                            cv2.THRESH_BINARY)  # Threshold, obtain the peaks, markers of foreground objects
+    kernel1 = np.ones((3, 3), dtype=np.uint8)
+    dist = cv2.dilate(dist, kernel1)  # Dilate a bit the dist image
+    #cv2.imshow('Peaks', dist)
+    cv2.imwrite('segmentation/Peaks.png', dist)
+    #cv2.waitKey(0)
+    dist_8u = dist.astype('uint8')  # Create the CV_8U version of the distance image, needed for findContours()
+    contours, _ = cv2.findContours(dist_8u, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # Find total markers
+    markers = np.zeros(dist.shape, dtype=np.int32)  # Create the marker image for the watershed algorithm
+    for i in range(len(contours)):
+        cv2.drawContours(markers, contours, i, (i + 1), -1)  # Draw the foreground markers
+    cv2.circle(markers, (5, 5), 3, (255, 255, 255), -1)  # Draw the background marker
+    markers_8u = (markers * 10).astype('uint8')
+    #cv2.imshow('Markers', markers_8u)
+    cv2.imwrite('segmentation/Markers.png', markers_8u)
+    #cv2.waitKey(0)
+    cv2.watershed(imgResult, markers)  # Perform the watershed algorithm
+    mark = np.zeros(markers.shape, dtype=np.uint8)
+    mark = markers.astype('uint8')
+    mark = cv2.bitwise_not(mark)
+    #cv2.imshow('Markers_v2', mark)
+    cv2.imwrite('segmentation/Markers_v2.png', mark)
+    #cv2.waitKey(0)
+    colors = []
+    for contour in contours:
+        colors.append((rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256)))  # Generate random colors
+    dst = np.zeros((markers.shape[0], markers.shape[1], 3), dtype=np.uint8)  # Create the result image
+    for i in range(markers.shape[0]):
+        for j in range(markers.shape[1]):
+            index = markers[i, j]
+            if 0 < index <= len(contours):
+                dst[i, j, :] = colors[index - 1]  # Fill labeled objects with random colors
+    #cv2.imshow('Final Result', dst)
+    #cv2.waitKey(0)
+    dst[np.all(dst == 0, axis=2)] = 255
+    cv2.imwrite('segmentation/Final result of segmentation.png', dst)
+    for c in contours:
+        for i in range(markers.shape[0]):
+            for j in range(markers.shape[1]):
+                index = markers[i, j]
+                if 0 < index <= len(contours):
+                    pass
+                else:
+                    dst[i, j, :] = 255
+        img = Image.open('test3.png')
+        imga = img.convert("RGBA")
+        datas = imga.getdata()
+        newData = []
+        for item in datas:
+            if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                newData.append((255, 255, 255, 0))
+            else:
+                newData.append(item)
+        img.putdata(newData)
+        newimg = Image.new('RGBA', (700, 440), (255, 255, 255, 0))
+        dst = Image.fromarray(dst)
+        dst.paste(img, newimg)
+        dst.save('Final Result_x.png')
+        dst = cv2.imread('Final Result_x.png')
+        cv2.imshow('Final Result_x.png', dst)
+        cv2.waitKey(0)
+
+segmentation(gray2)
 # deleting shapes included in bigger ones
 k = 0
 found_letter = []
-iter1 = 0
+
 for c in contours:
-    iter1 = iter1 + 1
-    iter2 = 0
-    x, y, w, h = cv2.boundingRect(c)
     found_letter.append(c)
-    for d in contours:
-        iter2 = iter2 + 1
-        if iter1 == iter2:
-            pass
-        else:
-            x2, y2, w2, h2 = cv2.boundingRect(d)
-            if (x >= x2) and (y >= y2) and ((x + w) <= (x2 + w2)) and ((y + h) <= (y2 + h2)):
-                found_letter.pop()
+
+
+def selection(contours):
+    iter1 = 0
+    for c in contours:
+        iter1 = iter1 + 1
+        iter2 = 0
+        x, y, w, h = cv2.boundingRect(c)
+        #if w < 10 or h < 5:
+            #found_letter.pop()
+        for d in contours:
+            iter2 = iter2 + 1
+            if iter1 == iter2:
+                pass
+            else:
+                x2, y2, w2, h2 = cv2.boundingRect(d)
+                if (x >= x2) and (y >= y2) and ((x + w) <= (x2 + w2)) and ((y + h) <= (y2 + h2)):
+                    found_letter.pop()
+                #elif (x <= x2) and (y <= y2) and ((x + w) >= (x2 + w2)) and ((y + h) >= (y2 + h2)):
+                    #found_letter.pop()
+
+
+selection(found_letter)
 number_of_found_letters = len(found_letter)  # number of found shapes
 print("OCR have found ", number_of_found_letters, " letters")
 # creating vectors for output
@@ -200,20 +319,53 @@ pre_output_27 = []
 pre_output_28 = []
 pre_output_29 = []
 program_output = []
-# main part of program
+
+found_letter_pad = []
+found_letter_v2 = []
+
+
+def resize_with_pad(image, target_width, target_height, m):  # function adding pads to found shapes
+    background = Image.new('RGBA', (target_width, target_height), (255, 255, 255, 255))
+    offset = (round((target_width - image.width) / 2), round((target_height - image.height) / 2))
+    background.paste(image, offset)
+    background.save('found_pad/found_letter_pad_' + str(m) + '.png')
+    imgs = cv2.imread('found_pad/found_letter_pad_' + str(m) + '.png')
+    found_letter_pad.append(imgs)
+
+
+m = 0
 for c in found_letter:
     x, y, w, h = cv2.boundingRect(c)
+    m = m + 1
+    im = gray[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]  # cutting shapes from input image
+    cv2.imwrite('found/found_letter_' + str(m) + '.png', im)
+    im = Image.fromarray(im)
+    im2 = cv2.imread('found/found_letter_' + str(m) + '.png')
+    resize_with_pad(im, w + 40, h + 40, m)
+
+for flp in found_letter_pad:
+    segmentation(flp)
+
+for c in contours:
+    found_letter_v2.append(c)
+
+selection(found_letter_v2)
+number_of_found_letters_v2 = len(found_letter_v2)  # number of found shapes
+print("OCR have found ", number_of_found_letters_v2, " letters")
+# main part of program
+for fl in found_letter_v2:
+    x, y, w, h = cv2.boundingRect(fl)
     k = k + 1
     im = gray[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]  # cutting shapes from input image
-    cv2.imwrite('found/found_letter_' + str(k) + '.png', im)
-    im2 = cv2.imread('found/found_letter_' + str(k) + '.png')
+    cv2.imwrite('found_v2/found_letter_' + str(k) + '.png', im)
+    im2 = cv2.imread('found_v2/found_letter_' + str(k) + '.png')
     im = Image.fromarray(im)
 
-    def resize_with_pad(image, target_width, target_height):  # function adding pads to found shapes
+    def resize_with_pad_v2(image, target_width, target_height):  # function adding pads to found shapes
         background = Image.new('RGBA', (target_width, target_height), (255, 255, 255, 255))
         offset = (round((target_width - image.width) / 2), round((target_height - image.height) / 2))
         background.paste(image, offset)
-        background.save('found_pad/found_letter_pad_' + str(k) + '.png')
+        background.save('found_pad_v2/found_letter_pad_' + str(k) + '.png')
 
         z = 0  # iterator for naming images containing matches
         distances_kaze = []
@@ -286,7 +438,7 @@ for c in found_letter:
         for iterator in range(26):
             alphabets_iterator = 0
             for alphabet_with_pad in Alphabets_pad:
-                i = cv2.imread('found_pad/found_letter_pad_' + str(k) + '.png')
+                i = cv2.imread('found_pad_v2/found_letter_pad_' + str(k) + '.png')
                 j = alphabet_with_pad[iterator]
                 # KAZE
                 kaze = cv2.KAZE_create()
@@ -545,8 +697,8 @@ for c in found_letter:
         return background.convert('RGB')
 
 
-    resize_with_pad(im, w + 40, h + 40)
-    print(k, "from", number_of_found_letters)
+    resize_with_pad_v2(im, w + 40, h + 40)
+    print(k, "from", number_of_found_letters_v2)
 
 print()
 
