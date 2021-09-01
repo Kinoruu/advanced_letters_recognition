@@ -150,7 +150,7 @@ l_y = cv2.imread(filename='alphabet_arial_italic/y.png', flags=cv2.IMREAD_GRAYSC
 Arial_Letters_italic.append(l_y)
 l_z = cv2.imread(filename='alphabet_arial_italic/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Arial_Letters_italic.append(l_z)
-'''
+
 l_a = cv2.imread(filename='alphabet_arial_bold/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Arial_Letters_bold.append(l_a)
 l_b = cv2.imread(filename='alphabet_arial_bold/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -203,7 +203,7 @@ l_y = cv2.imread(filename='alphabet_arial_bold/y.png', flags=cv2.IMREAD_GRAYSCAL
 Arial_Letters_bold.append(l_y)
 l_z = cv2.imread(filename='alphabet_arial_bold/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Arial_Letters_bold.append(l_z)
-'''
+
 l_a = cv2.imread(filename='alphabet_times_new_roman/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Times_NR_Letters.append(l_a)
 l_b = cv2.imread(filename='alphabet_times_new_roman/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -309,7 +309,7 @@ l_y = cv2.imread(filename='alphabet_times_new_roman_italic/y.png', flags=cv2.IMR
 Times_NR_Letters_italic.append(l_y)
 l_z = cv2.imread(filename='alphabet_times_new_roman_italic/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Times_NR_Letters_italic.append(l_z)
-'''
+
 l_a = cv2.imread(filename='alphabet_times_new_roman_bold/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Times_NR_Letters_bold.append(l_a)
 l_b = cv2.imread(filename='alphabet_times_new_roman_bold/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -362,7 +362,7 @@ l_y = cv2.imread(filename='alphabet_times_new_roman_bold/y.png', flags=cv2.IMREA
 Times_NR_Letters_bold.append(l_y)
 l_z = cv2.imread(filename='alphabet_times_new_roman_bold/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Times_NR_Letters_bold.append(l_z)
-'''
+
 l_a = cv2.imread(filename='alphabet_courier_new/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Courier_N_Letters.append(l_a)
 l_b = cv2.imread(filename='alphabet_courier_new/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -468,7 +468,7 @@ l_y = cv2.imread(filename='alphabet_courier_new_italic/y.png', flags=cv2.IMREAD_
 Courier_N_Letters_italic.append(l_y)
 l_z = cv2.imread(filename='alphabet_courier_new_italic/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Courier_N_Letters_italic.append(l_z)
-'''
+
 l_a = cv2.imread(filename='alphabet_courier_new_bold/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Courier_N_Letters_bold.append(l_a)
 l_b = cv2.imread(filename='alphabet_courier_new_bold/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -521,7 +521,7 @@ l_y = cv2.imread(filename='alphabet_courier_new_bold/y.png', flags=cv2.IMREAD_GR
 Courier_N_Letters_bold.append(l_y)
 l_z = cv2.imread(filename='alphabet_courier_new_bold/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Courier_N_Letters_bold.append(l_z)
-'''
+
 l_a = cv2.imread(filename='alphabet_calibri/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Calibri_Letters.append(l_a)
 l_b = cv2.imread(filename='alphabet_calibri/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -627,7 +627,7 @@ l_y = cv2.imread(filename='alphabet_calibri_italic/y.png', flags=cv2.IMREAD_GRAY
 Calibri_Letters_italic.append(l_y)
 l_z = cv2.imread(filename='alphabet_calibri_italic/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Calibri_Letters_italic.append(l_z)
-'''
+
 l_a = cv2.imread(filename='alphabet_calibri_bold/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Calibri_Letters_bold.append(l_a)
 l_b = cv2.imread(filename='alphabet_calibri_bold/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -680,7 +680,7 @@ l_y = cv2.imread(filename='alphabet_calibri_bold/y.png', flags=cv2.IMREAD_GRAYSC
 Calibri_Letters_bold.append(l_y)
 l_z = cv2.imread(filename='alphabet_calibri_bold/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Calibri_Letters_bold.append(l_z)
-'''
+
 l_a = cv2.imread(filename='alphabet_comic_sans/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Comic_S_Letters.append(l_a)
 l_b = cv2.imread(filename='alphabet_comic_sans/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -786,7 +786,7 @@ l_y = cv2.imread(filename='alphabet_comic_sans_italic/y.png', flags=cv2.IMREAD_G
 Comic_S_Letters_italic.append(l_y)
 l_z = cv2.imread(filename='alphabet_comic_sans_italic/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Comic_S_Letters_italic.append(l_z)
-'''
+
 l_a = cv2.imread(filename='alphabet_comic_sans_bold/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Comic_S_Letters_bold.append(l_a)
 l_b = cv2.imread(filename='alphabet_comic_sans_bold/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -839,4 +839,3 @@ l_y = cv2.imread(filename='alphabet_comic_sans_bold/y.png', flags=cv2.IMREAD_GRA
 Comic_S_Letters_bold.append(l_y)
 l_z = cv2.imread(filename='alphabet_comic_sans_bold/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Comic_S_Letters_bold.append(l_z)
-'''

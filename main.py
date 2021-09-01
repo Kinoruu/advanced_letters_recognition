@@ -35,12 +35,13 @@ except FileExistsError:
 # flags and changeable elements
 flag_i = 0  # italic flag
 flag_b = 0  # bold flag
-mean_range = 4
+mean_range = 4  # best possible choosed
 flag_geometric_mean = 1
 flag_mean = 0
 flag_minimum = 0
-height_pad = 5
-width_pad = 5
+height_pad = 5  # best possible choosed
+width_pad = 2  # best possible choosed
+threshold = 245  # best possible choosed
 # creating vectors for alphabets and importing from "import_letters.py"
 Alphabets = [letters_import.Arial_Letters, letters_import.Times_NR_Letters, letters_import.Courier_N_Letters,
              letters_import.Calibri_Letters, letters_import.Comic_S_Letters]
@@ -135,7 +136,7 @@ for h in range(height):
             white = white + 1
 if white < (height * width) / 2:
     gray = cv2.cv2.bitwise_not(gray)
-ret, binary = cv2.threshold(gray, 245, 255, cv2.THRESH_OTSU)
+ret, binary = cv2.threshold(gray, threshold, 255, cv2.THRESH_OTSU)
 inverted_binary = ~binary
 contours, hierarchy = cv2.findContours(inverted_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 '''
@@ -388,7 +389,10 @@ for c in found_letter:
                         return e.distance
 
                     def geo_mean_overflow(iterable):
-                        a = np.log(iterable)
+                        try:
+                            a = np.log(iterable)
+                        except:
+                            a = None
                         return np.exp(a.mean())
 
                     matches3.sort(key=key_sort)
@@ -589,8 +593,13 @@ def most_frequent(frequency_list):  # searching most frequent letter in all line
 
 for semi in Semi_final_output:
     Final_output.append(most_frequent(semi))
-
-text_file = open("ocered_text.txt", "a")
+try:
+    text_file = open("ocered_text.txt", "w")
+except FileExistsError:
+    text_file = open("ocered_text.txt", "r+")
+    text_file.truncate(0)
+    text_file.close()
+    text_file = open("ocered_text.txt", "a")
 for letter_x in range(len(Final_output)):
     print(Final_output[letter_x], sep=' ', end='', flush=True)
     text_file.write(Final_output[letter_x])
