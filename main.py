@@ -52,6 +52,12 @@ except FileExistsError:
     for root, dirs, files in os.walk('segmentation'):
         for f in files:
             os.unlink(os.path.join(root, f))
+try:
+    os.mkdir('croped')
+except FileExistsError:
+    for root, dirs, files in os.walk('croped'):
+        for f in files:
+            os.unlink(os.path.join(root, f))
 # flags and changeable elements
 flag_i = 0  # italic flag
 flag_b = 0  # bold flag
@@ -146,7 +152,7 @@ for alphabet in Alphabets_pad:
         iterator_full += 1
     iterator_empty += 1
 # searching all shapes in the input image
-gray2 = cv2.imread(filename='test3.png')
+no_gray = cv2.imread(filename='test3.png')
 gray = cv2.imread(filename='test3.png', flags=cv2.IMREAD_GRAYSCALE)
 gray = np.array(gray)
 height, width = gray.shape
@@ -161,44 +167,57 @@ ret, binary = cv2.threshold(gray, threshold, 255, cv2.THRESH_OTSU)
 inverted_binary = ~binary
 contours, hierarchy = cv2.findContours(inverted_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+ret, mask = cv2.threshold(gray, 255, 50, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+kernel = np.ones((9,9), np.uint8)
+mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
+# put mask into alpha channel of result
+result = no_gray.copy()
+result = cv2.cvtColor(result, cv2.COLOR_BGR2BGRA)
+result[:, :, 3] = mask
 
+# save resulting masked image
+cv2.imwrite('retina_masked.png', result)
+'''
 def segmentation(gray2):  # image segmentation
     rng.seed(12345)
-    try: gray2[np.all(gray2 == 255, axis=2)] = 0  # Change the background from white to black, it will help later to extract
-    except: gray2 = gray2
-    #cv2.imshow('Black Background Image', gray2)
+    try:
+        gray2[np.all(gray2 == 255, axis=2)] = 0  # Change the background from white to black, it will help later to extract
+    except:
+        gray2 = gray2
+    # cv2.imshow('Black Background Image', gray2)
     cv2.imwrite('segmentation/Black Background Image.png', gray2)
-    #cv2.waitKey(0)
+    # cv2.waitKey(0)
     kernel = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]],
                       dtype=np.float32)  # Kernel sharpening, approximation of second derivative
-    imgLaplacian = cv2.filter2D(gray2, cv2.CV_32F, kernel)  # do the laplacian filtering
+    img_laplacian = cv2.filter2D(gray2, cv2.CV_32F, kernel)  # do the laplacian filtering
     sharp = np.float32(gray2)
-    imgResult = sharp - imgLaplacian
-    imgResult = np.clip(imgResult, 0, 255)  # convert back to 8bits gray scale
-    imgResult = imgResult.astype('uint8')
-    imgLaplacian = np.clip(imgLaplacian, 0, 255)
-    imgLaplacian = np.uint8(imgLaplacian)
-    #cv2.imshow('New Sharped Image', imgResult)
-    cv2.imwrite('segmentation/New Sharped Image.png', imgResult)
-    #cv2.waitKey(0)
-    bw = cv2.cvtColor(imgResult, cv2.COLOR_BGR2GRAY)  # Create binary image from source image
+    img_result = sharp - img_laplacian
+    img_result = np.clip(img_result, 0, 255)  # convert back to 8bits gray scale
+    img_result = img_result.astype('uint8')
+    img_laplacian = np.clip(img_laplacian, 0, 255)
+    img_laplacian = np.uint8(img_laplacian)
+    # cv2.imshow('New Sharped Image', img_result)
+    cv2.imwrite('segmentation/New Sharped Image.png', img_result)
+    # cv2.waitKey(0)
+    bw = cv2.cvtColor(img_result, cv2.COLOR_BGR2GRAY)  # Create binary image from source image
     _, bw = cv2.threshold(bw, threshold, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    #cv2.imshow('Binary Image', bw)
+    # cv2.imshow('Binary Image', bw)
     cv2.imwrite('segmentation/Binary Image.png', bw)
-    #cv2.waitKey(0)
+    # cv2.waitKey(0)
     dist = cv2.distanceTransform(bw, cv2.DIST_L2, 3)  # Perform the distance transform algorithm
     cv2.normalize(dist, dist, 0, 1.0, cv2.NORM_MINMAX)  # Normalize the distance image for range = {0.0, 1.0}
-    #cv2.imshow('Distance Transform Image', dist)
+    # cv2.imshow('Distance Transform Image', dist)
     cv2.imwrite('segmentation/Distance Transform Image.png', dist)
-    #cv2.waitKey(0)
+    # cv2.waitKey(0)
     _, dist = cv2.threshold(dist, threshold, 255,
                             cv2.THRESH_BINARY)  # Threshold, obtain the peaks, markers of foreground objects
     kernel1 = np.ones((3, 3), dtype=np.uint8)
     dist = cv2.dilate(dist, kernel1)  # Dilate a bit the dist image
-    #cv2.imshow('Peaks', dist)
+    # cv2.imshow('Peaks', dist)
     cv2.imwrite('segmentation/Peaks.png', dist)
-    #cv2.waitKey(0)
+    # cv2.waitKey(0)
     dist_8u = dist.astype('uint8')  # Create the CV_8U version of the distance image, needed for findContours()
     contours, _ = cv2.findContours(dist_8u, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # Find total markers
     markers = np.zeros(dist.shape, dtype=np.int32)  # Create the marker image for the watershed algorithm
@@ -206,16 +225,16 @@ def segmentation(gray2):  # image segmentation
         cv2.drawContours(markers, contours, i, (i + 1), -1)  # Draw the foreground markers
     cv2.circle(markers, (5, 5), 3, (255, 255, 255), -1)  # Draw the background marker
     markers_8u = (markers * 10).astype('uint8')
-    #cv2.imshow('Markers', markers_8u)
+    # cv2.imshow('Markers', markers_8u)
     cv2.imwrite('segmentation/Markers.png', markers_8u)
-    #cv2.waitKey(0)
-    cv2.watershed(imgResult, markers)  # Perform the watershed algorithm
+    # cv2.waitKey(0)
+    cv2.watershed(img_result, markers)  # Perform the watershed algorithm
     mark = np.zeros(markers.shape, dtype=np.uint8)
     mark = markers.astype('uint8')
     mark = cv2.bitwise_not(mark)
-    #cv2.imshow('Markers_v2', mark)
+    # cv2.imshow('Markers_v2', mark)
     cv2.imwrite('segmentation/Markers_v2.png', mark)
-    #cv2.waitKey(0)
+    # cv2.waitKey(0)
     colors = []
     for contour in contours:
         colors.append((rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256)))  # Generate random colors
@@ -225,8 +244,8 @@ def segmentation(gray2):  # image segmentation
             index = markers[i, j]
             if 0 < index <= len(contours):
                 dst[i, j, :] = colors[index - 1]  # Fill labeled objects with random colors
-    #cv2.imshow('Final Result', dst)
-    #cv2.waitKey(0)
+    # cv2.imshow('Final Result', dst)
+    # cv2.waitKey(0)
     dst[np.all(dst == 0, axis=2)] = 255
     cv2.imwrite('segmentation/Final result of segmentation.png', dst)
     for c in contours:
@@ -239,23 +258,25 @@ def segmentation(gray2):  # image segmentation
                     dst[i, j, :] = 255
         img = Image.open('test3.png')
         imga = img.convert("RGBA")
-        datas = imga.getdata()
-        newData = []
-        for item in datas:
+        data_s = imga.getdata()
+        new_data = []
+        for item in data_s:
             if item[0] == 255 and item[1] == 255 and item[2] == 255:
-                newData.append((255, 255, 255, 0))
+                new_data.append((255, 255, 255, 0))
             else:
-                newData.append(item)
-        img.putdata(newData)
-        newimg = Image.new('RGBA', (700, 440), (255, 255, 255, 0))
+                new_data.append(item)
+        img.putdata(new_data)
+        new_img = Image.new('RGBA', (700, 440), (255, 255, 255, 0))
         dst = Image.fromarray(dst)
-        dst.paste(img, newimg)
+        dst.paste(img, new_img)
         dst.save('Final Result_x.png')
         dst = cv2.imread('Final Result_x.png')
         cv2.imshow('Final Result_x.png', dst)
         cv2.waitKey(0)
 
-segmentation(gray2)
+
+segmentation(no_gray)
+'''
 # deleting shapes included in bigger ones
 k = 0
 found_letter = []
@@ -264,24 +285,23 @@ for c in contours:
     found_letter.append(c)
 
 
-def selection(contours):
+def selection(contours_sel):
     iter1 = 0
-    for c in contours:
+    for cs in contours_sel:
         iter1 = iter1 + 1
         iter2 = 0
-        x, y, w, h = cv2.boundingRect(c)
-        #if w < 10 or h < 5:
-            #found_letter.pop()
-        for d in contours:
+        xs, ys, ws, hs = cv2.boundingRect(cs)
+        if w < 10 or h < 5:
+            found_letter.pop()
+        for ds in contours_sel:
             iter2 = iter2 + 1
             if iter1 == iter2:
                 pass
             else:
-                x2, y2, w2, h2 = cv2.boundingRect(d)
-                if (x >= x2) and (y >= y2) and ((x + w) <= (x2 + w2)) and ((y + h) <= (y2 + h2)):
+                xs2, ys2, ws2, hs2 = cv2.boundingRect(ds)
+                if (xs >= xs2) and ((xs + ws) <= (xs2 + ws2)) and (ys >= ys2) and ((ys + hs) <= (ys2 + hs2)):
                     found_letter.pop()
-                #elif (x <= x2) and (y <= y2) and ((x + w) >= (x2 + w2)) and ((y + h) >= (y2 + h2)):
-                    #found_letter.pop()
+                    pass
 
 
 selection(found_letter)
@@ -324,381 +344,414 @@ found_letter_pad = []
 found_letter_v2 = []
 
 
-def resize_with_pad(image, target_width, target_height, m):  # function adding pads to found shapes
+def resize_with_pad(image, target_width, target_height, pr):  # function adding pads to found shapes
     background = Image.new('RGBA', (target_width, target_height), (255, 255, 255, 255))
     offset = (round((target_width - image.width) / 2), round((target_height - image.height) / 2))
     background.paste(image, offset)
-    background.save('found_pad/found_letter_pad_' + str(m) + '.png')
-    imgs = cv2.imread('found_pad/found_letter_pad_' + str(m) + '.png')
+    background.save('found_pad/found_letter_pad_' + str(pr) + '.png')
+    imgs = cv2.imread('found_pad/found_letter_pad_' + str(pr) + '.png')
     found_letter_pad.append(imgs)
 
 
-m = 0
+p = 0
 for c in found_letter:
     x, y, w, h = cv2.boundingRect(c)
-    m = m + 1
+    p = p + 1
     im = gray[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]  # cutting shapes from input image
-    cv2.imwrite('found/found_letter_' + str(m) + '.png', im)
-    im = Image.fromarray(im)
-    im2 = cv2.imread('found/found_letter_' + str(m) + '.png')
-    resize_with_pad(im, w + 40, h + 40, m)
+    cv2.imwrite('found/found_letter_' + str(p) + '.png', im)
 
+    mask = np.zeros(im.shape[:3], dtype=np.uint8)
+
+    # loop through the contours
+    for i, cnt in enumerate(contours):
+        # if the contour has no other contours inside of it
+        if hierarchy[0][i][2] == -1:
+            # if the size of the contour is greater than a threshold
+            if cv2.contourArea(cnt) > 10:
+                cv2.drawContours(mask, [cnt], 0, 255, -1)
+    mask = ~mask
+    '''
+    im = ~im
+    ret, mask = cv2.threshold(im, 245, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    kernel = np.zeros((0, 0), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    result = im.copy()
+    result = cv2.cvtColor(result, cv2.COLOR_BGR2BGRA)
+    result[:, :, 3] = mask
+    cv2.imwrite('croped/found_letter_' + str(p) + '.png', result)
+    result = ~result
+    found_letter_v2.append(result)
+    '''
+    im = Image.fromarray(mask)
+    # result = Image.fromarray(result)
+    im2 = cv2.imread('found/found_letter_' + str(p) + '.png')
+
+    resize_with_pad(im, w + 40, h + 40, p)
+'''
 for flp in found_letter_pad:
     segmentation(flp)
 
 for c in contours:
     found_letter_v2.append(c)
-
-selection(found_letter_v2)
+'''
 number_of_found_letters_v2 = len(found_letter_v2)  # number of found shapes
 print("OCR have found ", number_of_found_letters_v2, " letters")
 # main part of program
-for fl in found_letter_v2:
-    x, y, w, h = cv2.boundingRect(fl)
+for fl in found_letter_pad:
+
+    #x, y, w, h = cv2.boundingRect(fl)
     k = k + 1
+    '''
     im = gray[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]  # cutting shapes from input image
     cv2.imwrite('found_v2/found_letter_' + str(k) + '.png', im)
     im2 = cv2.imread('found_v2/found_letter_' + str(k) + '.png')
     im = Image.fromarray(im)
+    '''
+    #def resize_with_pad_v2(image, target_width, target_height):  # function adding pads to found shapes
+    '''
+    background = Image.new('RGBA', (target_width, target_height), (255, 255, 255, 255))
+    offset = (round((target_width - image.width) / 2), round((target_height - image.height) / 2))
+    background.paste(image, offset)
+    background.save('found_pad_v2/found_letter_pad_' + str(k) + '.png')
+    '''
+    z = 0  # iterator for naming images containing matches
+    distances_kaze = []
+    distances_kaze_a = []
+    distances_kaze.append(distances_kaze_a)
+    distances_kaze_tnr = []
+    distances_kaze.append(distances_kaze_tnr)
+    distances_kaze_cn = []
+    distances_kaze.append(distances_kaze_cn)
+    distances_kaze_c = []
+    distances_kaze.append(distances_kaze_c)
+    distances_kaze_cs = []
+    distances_kaze.append(distances_kaze_cs)
+    distances_kaze_a_i = []
+    distances_kaze_tnr_i = []
+    distances_kaze_cn_i = []
+    distances_kaze_c_i = []
+    distances_kaze_cs_i = []
+    distances_kaze_a_b = []
+    distances_kaze_tnr_b = []
+    distances_kaze_cn_b = []
+    distances_kaze_c_b = []
+    distances_kaze_cs_b = []
+    if flag_i == 1:
+        distances_kaze.append(distances_kaze_a_i)
+        distances_kaze.append(distances_kaze_tnr_i)
+        distances_kaze.append(distances_kaze_cn_i)
+        distances_kaze.append(distances_kaze_c_i)
+        distances_kaze.append(distances_kaze_cs_i)
+    if flag_b == 1:
+        distances_kaze.append(distances_kaze_a_b)
+        distances_kaze.append(distances_kaze_tnr_b)
+        distances_kaze.append(distances_kaze_cn_b)
+        distances_kaze.append(distances_kaze_c_b)
+        distances_kaze.append(distances_kaze_cs_b)
+    distances_brisk = []
+    distances_brisk_a = []
+    distances_brisk.append(distances_brisk_a)
+    distances_brisk_tnr = []
+    distances_brisk.append(distances_brisk_tnr)
+    distances_brisk_cn = []
+    distances_brisk.append(distances_brisk_cn)
+    distances_brisk_c = []
+    distances_brisk.append(distances_brisk_c)
+    distances_brisk_cs = []
+    distances_brisk.append(distances_brisk_cs)
+    distances_brisk_a_i = []
+    distances_brisk_tnr_i = []
+    distances_brisk_cn_i = []
+    distances_brisk_c_i = []
+    distances_brisk_cs_i = []
+    distances_brisk_a_b = []
+    distances_brisk_tnr_b = []
+    distances_brisk_cn_b = []
+    distances_brisk_c_b = []
+    distances_brisk_cs_b = []
+    if flag_i == 1:
+        distances_brisk.append(distances_brisk_a_i)
+        distances_brisk.append(distances_brisk_tnr_i)
+        distances_brisk.append(distances_brisk_cn_i)
+        distances_brisk.append(distances_brisk_c_i)
+        distances_brisk.append(distances_brisk_cs_i)
+    if flag_b == 1:
+        distances_brisk.append(distances_brisk_a_b)
+        distances_brisk.append(distances_brisk_tnr_b)
+        distances_brisk.append(distances_brisk_cn_b)
+        distances_brisk.append(distances_brisk_c_b)
+        distances_brisk.append(distances_brisk_cs_b)
+    # main comparison loop
+    for iterator in range(26):
+        alphabets_iterator = 0
+        for alphabet_with_pad in Alphabets_pad:
+            i = cv2.imread('found_pad/found_letter_pad_' + str(k) + '.png')
+            j = alphabet_with_pad[iterator]
+            # KAZE
+            kaze = cv2.KAZE_create()
+            keypoints1, descriptors1 = kaze.detectAndCompute(i, None)
+            keypoints2, descriptors2 = kaze.detectAndCompute(j, None)
+            if descriptors1 is None or descriptors2 is None:
+                pass
+            else:
+                flann_index_kdtree = 1
+                index_params = dict(algorithm=flann_index_kdtree, trees=5)
+                search_params = dict(checks=100)
+                descriptors1 = np.float32(descriptors1)
+                descriptors2 = np.float32(descriptors2)
+                flann = cv2.FlannBasedMatcher(indexParams=index_params, searchParams=search_params)
+                matches = flann.knnMatch(queryDescriptors=descriptors1, trainDescriptors=descriptors2, k=2)
+                matches2 = []
+                for m, n in matches:
+                    matches2.append(m)
+                if len(matches2) > 0:
+                    min_distance = matches2[0]
+                    for m in matches2:
+                        current_distance = m
+                        if min_distance.distance > current_distance.distance:
+                            min_distance = current_distance
+                    if min_distance.distance <= 0.091:
+                        output3 = cv2.drawMatches(img1=i, keypoints1=keypoints1, img2=j,
+                                                  keypoints2=keypoints2, matches1to2=matches2, outImg=None,
+                                                  flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+                        cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + '.jpg', output3)  #
+                        cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' i.jpg',
+                                    i)  # saving image with drawn matches
+                        cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' j.jpg', j)  #
 
-    def resize_with_pad_v2(image, target_width, target_height):  # function adding pads to found shapes
-        background = Image.new('RGBA', (target_width, target_height), (255, 255, 255, 255))
-        offset = (round((target_width - image.width) / 2), round((target_height - image.height) / 2))
-        background.paste(image, offset)
-        background.save('found_pad_v2/found_letter_pad_' + str(k) + '.png')
 
-        z = 0  # iterator for naming images containing matches
-        distances_kaze = []
-        distances_kaze_a = []
-        distances_kaze.append(distances_kaze_a)
-        distances_kaze_tnr = []
-        distances_kaze.append(distances_kaze_tnr)
-        distances_kaze_cn = []
-        distances_kaze.append(distances_kaze_cn)
-        distances_kaze_c = []
-        distances_kaze.append(distances_kaze_c)
-        distances_kaze_cs = []
-        distances_kaze.append(distances_kaze_cs)
-        distances_kaze_a_i = []
-        distances_kaze_tnr_i = []
-        distances_kaze_cn_i = []
-        distances_kaze_c_i = []
-        distances_kaze_cs_i = []
-        distances_kaze_a_b = []
-        distances_kaze_tnr_b = []
-        distances_kaze_cn_b = []
-        distances_kaze_c_b = []
-        distances_kaze_cs_b = []
-        if flag_i == 1:
-            distances_kaze.append(distances_kaze_a_i)
-            distances_kaze.append(distances_kaze_tnr_i)
-            distances_kaze.append(distances_kaze_cn_i)
-            distances_kaze.append(distances_kaze_c_i)
-            distances_kaze.append(distances_kaze_cs_i)
-        if flag_b == 1:
-            distances_kaze.append(distances_kaze_a_b)
-            distances_kaze.append(distances_kaze_tnr_b)
-            distances_kaze.append(distances_kaze_cn_b)
-            distances_kaze.append(distances_kaze_c_b)
-            distances_kaze.append(distances_kaze_cs_b)
-        distances_brisk = []
-        distances_brisk_a = []
-        distances_brisk.append(distances_brisk_a)
-        distances_brisk_tnr = []
-        distances_brisk.append(distances_brisk_tnr)
-        distances_brisk_cn = []
-        distances_brisk.append(distances_brisk_cn)
-        distances_brisk_c = []
-        distances_brisk.append(distances_brisk_c)
-        distances_brisk_cs = []
-        distances_brisk.append(distances_brisk_cs)
-        distances_brisk_a_i = []
-        distances_brisk_tnr_i = []
-        distances_brisk_cn_i = []
-        distances_brisk_c_i = []
-        distances_brisk_cs_i = []
-        distances_brisk_a_b = []
-        distances_brisk_tnr_b = []
-        distances_brisk_cn_b = []
-        distances_brisk_c_b = []
-        distances_brisk_cs_b = []
-        if flag_i == 1:
-            distances_brisk.append(distances_brisk_a_i)
-            distances_brisk.append(distances_brisk_tnr_i)
-            distances_brisk.append(distances_brisk_cn_i)
-            distances_brisk.append(distances_brisk_c_i)
-            distances_brisk.append(distances_brisk_cs_i)
-        if flag_b == 1:
-            distances_brisk.append(distances_brisk_a_b)
-            distances_brisk.append(distances_brisk_tnr_b)
-            distances_brisk.append(distances_brisk_cn_b)
-            distances_brisk.append(distances_brisk_c_b)
-            distances_brisk.append(distances_brisk_cs_b)
-        # main comparison loop
-        for iterator in range(26):
-            alphabets_iterator = 0
-            for alphabet_with_pad in Alphabets_pad:
-                i = cv2.imread('found_pad_v2/found_letter_pad_' + str(k) + '.png')
-                j = alphabet_with_pad[iterator]
-                # KAZE
-                kaze = cv2.KAZE_create()
-                keypoints1, descriptors1 = kaze.detectAndCompute(i, None)
-                keypoints2, descriptors2 = kaze.detectAndCompute(j, None)
-                if descriptors1 is None or descriptors2 is None:
-                    pass
-                else:
-                    flann_index_kdtree = 1
-                    index_params = dict(algorithm=flann_index_kdtree, trees=5)
-                    search_params = dict(checks=100)
-                    descriptors1 = np.float32(descriptors1)
-                    descriptors2 = np.float32(descriptors2)
-                    flann = cv2.FlannBasedMatcher(indexParams=index_params, searchParams=search_params)
-                    matches = flann.knnMatch(queryDescriptors=descriptors1, trainDescriptors=descriptors2, k=2)
-                    matches2 = []
-                    for m, n in matches:
-                        matches2.append(m)
-                    if len(matches2) > 0:
-                        min_distance = matches2[0]
-                        for m in matches2:
-                            current_distance = m
-                            if min_distance.distance > current_distance.distance:
-                                min_distance = current_distance
-                        if min_distance.distance <= 0.091:
-                            output3 = cv2.drawMatches(img1=i, keypoints1=keypoints1, img2=j,
-                                                      keypoints2=keypoints2, matches1to2=matches2, outImg=None,
-                                                      flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-                            cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + '.jpg', output3)  #
-                            cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' i.jpg',
-                                        i)  # saving image with drawn matches
-                            cv2.imwrite('kaze/image_kaze_best_' + str(z) + " " + str(k) + ' j.jpg', j)  #
+                def key_sort(e):
+                    return e.distance
 
-                    def key_sort(e):
-                        return e.distance
 
-                    def geo_mean_overflow(iterable):
+                def geo_mean_overflow(iterable):
+                    a = np.log(iterable)
+                    return np.exp(a.mean())
+
+
+                matches2.sort(key=key_sort)
+                sum_dist = 0
+                iter_check = 0
+                avg_dist = None
+                sum_dist_array = []
+                for sum_iter in range(mean_range):
+                    try:
+                        if flag_mean == 1:
+                            sum_dist = sum_dist + matches2[sum_iter].distance  # mean distance calculating
+                        if flag_geometric_mean == 1:
+                            sum_dist_array.append(matches2[sum_iter].distance)  # geometric mean calculating
+                        # print("sum dist= ", sum_dist, " matches2[sum_iter]= ", matches2[sum_iter].distance)
+                        iter_check = iter_check + 1
+                    except:
+                        pass
+                if flag_mean == 1:
+                    avg_dist = sum_dist / iter_check  # mean distance calculating
+                if flag_geometric_mean == 1:
+                    avg_dist = geo_mean_overflow(sum_dist_array)  # geometric mean calculating
+                if flag_minimum == 1:
+                    avg_dist = matches2[0].distance  # minimum distance calculating
+                # print("avg_dist= ", avg_dist)
+                distances_kaze[alphabets_iterator].append(avg_dist)
+            # BRISK
+            brisk = cv2.BRISK_create()
+            keypoints1, descriptors1 = brisk.detectAndCompute(i, None)
+            keypoints2, descriptors2 = brisk.detectAndCompute(j, None)
+            if descriptors1 is None or descriptors2 is None:
+                pass
+            else:
+                bfmatcher = cv2.BFMatcher(normType=cv2.NORM_HAMMING, crossCheck=True)
+                matches = bfmatcher.match(queryDescriptors=descriptors1, trainDescriptors=descriptors2)
+                matches = sorted(matches, key=lambda x: x.distance)
+                flann_index_kdtree = 1
+                index_params = dict(algorithm=flann_index_kdtree, trees=5)
+                search_params = dict(checks=100)
+                descriptors1 = np.float32(descriptors1)
+                descriptors2 = np.float32(descriptors2)
+                flann = cv2.FlannBasedMatcher(indexParams=index_params, searchParams=search_params)
+                matches = flann.knnMatch(queryDescriptors=descriptors1, trainDescriptors=descriptors2, k=2)
+                matches3 = []
+                for m, n in matches:
+                    matches3.append(m)
+                if len(matches3) > 0:
+                    min_distance = matches3[0]
+                    for m in matches3:
+                        current_distance = m
+                        if min_distance.distance > current_distance.distance:
+                            min_distance = current_distance
+                    if min_distance.distance <= 490:
+                        output3 = cv2.drawMatches(img1=i, keypoints1=keypoints1, img2=j, keypoints2=keypoints2,
+                                                  matches1to2=matches3, outImg=None,
+                                                  flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+                        cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + '.jpg', output3)  #
+                        cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' i.jpg',
+                                    i)  # saving image with drawn matches
+                        cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' j.jpg', j)  #
+
+
+                def key_sort(e):
+                    return e.distance
+
+
+                def geo_mean_overflow(iterable):
+                    try:
                         a = np.log(iterable)
-                        return np.exp(a.mean())
-
-                    matches2.sort(key=key_sort)
-                    sum_dist = 0
-                    iter_check = 0
-                    avg_dist = None
-                    sum_dist_array = []
-                    for sum_iter in range(mean_range):
-                        try:
-                            if flag_mean == 1:
-                                sum_dist = sum_dist + matches2[sum_iter].distance  # mean distance calculating
-                            if flag_geometric_mean == 1:
-                                sum_dist_array.append(matches2[sum_iter].distance)  # geometric mean calculating
-                            # print("sum dist= ", sum_dist, " matches2[sum_iter]= ", matches2[sum_iter].distance)
-                            iter_check = iter_check + 1
-                        except:
-                            pass
-                    if flag_mean == 1:
-                        avg_dist = sum_dist / iter_check  # mean distance calculating
-                    if flag_geometric_mean == 1:
-                        avg_dist = geo_mean_overflow(sum_dist_array)  # geometric mean calculating
-                    if flag_minimum == 1:
-                        avg_dist = matches2[0].distance  # minimum distance calculating
-                    # print("avg_dist= ", avg_dist)
-                    distances_kaze[alphabets_iterator].append(avg_dist)
-                # BRISK
-                brisk = cv2.BRISK_create()
-                keypoints1, descriptors1 = brisk.detectAndCompute(i, None)
-                keypoints2, descriptors2 = brisk.detectAndCompute(j, None)
-                if descriptors1 is None or descriptors2 is None:
-                    pass
-                else:
-                    bfmatcher = cv2.BFMatcher(normType=cv2.NORM_HAMMING, crossCheck=True)
-                    matches = bfmatcher.match(queryDescriptors=descriptors1, trainDescriptors=descriptors2)
-                    matches = sorted(matches, key=lambda x: x.distance)
-                    flann_index_kdtree = 1
-                    index_params = dict(algorithm=flann_index_kdtree, trees=5)
-                    search_params = dict(checks=100)
-                    descriptors1 = np.float32(descriptors1)
-                    descriptors2 = np.float32(descriptors2)
-                    flann = cv2.FlannBasedMatcher(indexParams=index_params, searchParams=search_params)
-                    matches = flann.knnMatch(queryDescriptors=descriptors1, trainDescriptors=descriptors2, k=2)
-                    matches3 = []
-                    for m, n in matches:
-                        matches3.append(m)
-                    if len(matches3) > 0:
-                        min_distance = matches3[0]
-                        for m in matches3:
-                            current_distance = m
-                            if min_distance.distance > current_distance.distance:
-                                min_distance = current_distance
-                        if min_distance.distance <= 490:
-                            output3 = cv2.drawMatches(img1=i, keypoints1=keypoints1, img2=j, keypoints2=keypoints2,
-                                                      matches1to2=matches3, outImg=None,
-                                                      flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-                            cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + '.jpg', output3)  #
-                            cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' i.jpg',
-                                        i)  # saving image with drawn matches
-                            cv2.imwrite('brisk/image_brisk_best_' + str(z) + " " + str(k) + ' j.jpg', j)  #
-
-                    def key_sort(e):
-                        return e.distance
-
-                    def geo_mean_overflow(iterable):
-                        try:
-                            a = np.log(iterable)
-                        except:
-                            a = None
-                        return np.exp(a.mean())
-
-                    matches3.sort(key=key_sort)
-                    sum_dist = 0
-                    sum_dist_array = []
-                    iter_check = 0
-                    avg_dist = None
-                    for sum_iter in range(mean_range):
-                        try:
-                            if flag_mean == 1:
-                                sum_dist = sum_dist + matches3[sum_iter].distance  # mean distance calculating
-                            if flag_geometric_mean == 1:
-                                sum_dist_array.append(matches3[sum_iter].distance)  # geometric mean calculating
-                            iter_check = iter_check + 1
-                        except:
-                            pass
-                    if flag_mean == 1:
-                        avg_dist = sum_dist / iter_check  # mean distance calculating
-                    if flag_geometric_mean == 1:
-                        avg_dist = geo_mean_overflow(sum_dist_array)  # geometric mean calculating
-                    if flag_minimum == 1:
-                        avg_dist = matches3[0].distance  # minimum distance calculating
-                    distances_brisk[alphabets_iterator].append(avg_dist)
-                alphabets_iterator = alphabets_iterator + 1
-
-            if iterator == 25:
-                try:
-                    pre_output_0.append((Alphabet_Letters[distances_brisk[0].index(min(distances_brisk_a))]))
-                except:
-                    pass
-                try:
-                    pre_output_1.append((Alphabet_Letters[distances_brisk[1].index(min(distances_brisk_tnr))]))
-                except:
-                    pass
-                try:
-                    pre_output_2.append((Alphabet_Letters[distances_brisk[2].index(min(distances_brisk_cn))]))
-                except:
-                    pass
-                try:
-                    pre_output_3.append((Alphabet_Letters[distances_brisk[3].index(min(distances_brisk_c))]))
-                except:
-                    pass
-                try:
-                    pre_output_4.append((Alphabet_Letters[distances_brisk[4].index(min(distances_brisk_cs))]))
-                except:
-                    pass
-                try:
-                    pre_output_5.append((Alphabet_Letters[distances_kaze[0].index(min(distances_kaze_a))]))
-                except:
-                    pass
-                try:
-                    pre_output_6.append((Alphabet_Letters[distances_kaze[1].index(min(distances_kaze_tnr))]))
-                except:
-                    pass
-                try:
-                    pre_output_7.append((Alphabet_Letters[distances_kaze[2].index(min(distances_kaze_cn))]))
-                except:
-                    pass
-                try:
-                    pre_output_8.append((Alphabet_Letters[distances_kaze[3].index(min(distances_kaze_c))]))
-                except:
-                    pass
-                try:
-                    pre_output_9.append((Alphabet_Letters[distances_kaze[4].index(min(distances_kaze_cs))]))
-                except:
-                    pass
-                if flag_i == 1:
-                    try:
-                        pre_output_10.append((Alphabet_Letters[distances_brisk[5].index(min(distances_brisk_a_i))]))
                     except:
-                        pass
-                    try:
-                        pre_output_11.append((Alphabet_Letters[distances_brisk[6].index(min(distances_brisk_tnr_i))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_12.append((Alphabet_Letters[distances_brisk[7].index(min(distances_brisk_cn_i))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_13.append((Alphabet_Letters[distances_brisk[8].index(min(distances_brisk_c_i))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_14.append((Alphabet_Letters[distances_brisk[9].index(min(distances_brisk_cs_i))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_15.append((Alphabet_Letters[distances_kaze[5].index(min(distances_kaze_a_i))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_16.append((Alphabet_Letters[distances_kaze[6].index(min(distances_kaze_tnr_i))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_17.append((Alphabet_Letters[distances_kaze[7].index(min(distances_kaze_cn_i))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_18.append((Alphabet_Letters[distances_kaze[8].index(min(distances_kaze_c_i))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_19.append((Alphabet_Letters[distances_kaze[9].index(min(distances_kaze_cs_i))]))
-                    except:
-                        pass
-                if flag_b == 1:
-                    try:
-                        pre_output_10.append((Alphabet_Letters[distances_brisk[10].index(min(distances_brisk_a_b))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_11.append((Alphabet_Letters[distances_brisk[11].index(min(distances_brisk_tnr_b))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_12.append((Alphabet_Letters[distances_brisk[12].index(min(distances_brisk_cn_b))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_13.append((Alphabet_Letters[distances_brisk[13].index(min(distances_brisk_c_b))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_14.append((Alphabet_Letters[distances_brisk[14].index(min(distances_brisk_cs_b))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_15.append((Alphabet_Letters[distances_kaze[10].index(min(distances_kaze_a_b))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_16.append((Alphabet_Letters[distances_kaze[11].index(min(distances_kaze_tnr_b))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_17.append((Alphabet_Letters[distances_kaze[12].index(min(distances_kaze_cn_b))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_18.append((Alphabet_Letters[distances_kaze[13].index(min(distances_kaze_c_b))]))
-                    except:
-                        pass
-                    try:
-                        pre_output_19.append((Alphabet_Letters[distances_kaze[14].index(min(distances_kaze_cs_b))]))
-                    except:
-                        pass
-            z = z + 1
-        return background.convert('RGB')
+                        a = None
+                    return np.exp(a.mean())
 
 
-    resize_with_pad_v2(im, w + 40, h + 40)
-    print(k, "from", number_of_found_letters_v2)
+                matches3.sort(key=key_sort)
+                sum_dist = 0
+                sum_dist_array = []
+                iter_check = 0
+                avg_dist = None
+                for sum_iter in range(mean_range):
+                    try:
+                        if flag_mean == 1:
+                            sum_dist = sum_dist + matches3[sum_iter].distance  # mean distance calculating
+                        if flag_geometric_mean == 1:
+                            sum_dist_array.append(matches3[sum_iter].distance)  # geometric mean calculating
+                        iter_check = iter_check + 1
+                    except:
+                        pass
+                if flag_mean == 1:
+                    avg_dist = sum_dist / iter_check  # mean distance calculating
+                if flag_geometric_mean == 1:
+                    avg_dist = geo_mean_overflow(sum_dist_array)  # geometric mean calculating
+                if flag_minimum == 1:
+                    avg_dist = matches3[0].distance  # minimum distance calculating
+                distances_brisk[alphabets_iterator].append(avg_dist)
+            alphabets_iterator = alphabets_iterator + 1
+
+        if iterator == 25:
+            try:
+                pre_output_0.append((Alphabet_Letters[distances_brisk[0].index(min(distances_brisk_a))]))
+            except:
+                pass
+            try:
+                pre_output_1.append((Alphabet_Letters[distances_brisk[1].index(min(distances_brisk_tnr))]))
+            except:
+                pass
+            try:
+                pre_output_2.append((Alphabet_Letters[distances_brisk[2].index(min(distances_brisk_cn))]))
+            except:
+                pass
+            try:
+                pre_output_3.append((Alphabet_Letters[distances_brisk[3].index(min(distances_brisk_c))]))
+            except:
+                pass
+            try:
+                pre_output_4.append((Alphabet_Letters[distances_brisk[4].index(min(distances_brisk_cs))]))
+            except:
+                pass
+            try:
+                pre_output_5.append((Alphabet_Letters[distances_kaze[0].index(min(distances_kaze_a))]))
+            except:
+                pass
+            try:
+                pre_output_6.append((Alphabet_Letters[distances_kaze[1].index(min(distances_kaze_tnr))]))
+            except:
+                pass
+            try:
+                pre_output_7.append((Alphabet_Letters[distances_kaze[2].index(min(distances_kaze_cn))]))
+            except:
+                pass
+            try:
+                pre_output_8.append((Alphabet_Letters[distances_kaze[3].index(min(distances_kaze_c))]))
+            except:
+                pass
+            try:
+                pre_output_9.append((Alphabet_Letters[distances_kaze[4].index(min(distances_kaze_cs))]))
+            except:
+                pass
+            if flag_i == 1:
+                try:
+                    pre_output_10.append((Alphabet_Letters[distances_brisk[5].index(min(distances_brisk_a_i))]))
+                except:
+                    pass
+                try:
+                    pre_output_11.append((Alphabet_Letters[distances_brisk[6].index(min(distances_brisk_tnr_i))]))
+                except:
+                    pass
+                try:
+                    pre_output_12.append((Alphabet_Letters[distances_brisk[7].index(min(distances_brisk_cn_i))]))
+                except:
+                    pass
+                try:
+                    pre_output_13.append((Alphabet_Letters[distances_brisk[8].index(min(distances_brisk_c_i))]))
+                except:
+                    pass
+                try:
+                    pre_output_14.append((Alphabet_Letters[distances_brisk[9].index(min(distances_brisk_cs_i))]))
+                except:
+                    pass
+                try:
+                    pre_output_15.append((Alphabet_Letters[distances_kaze[5].index(min(distances_kaze_a_i))]))
+                except:
+                    pass
+                try:
+                    pre_output_16.append((Alphabet_Letters[distances_kaze[6].index(min(distances_kaze_tnr_i))]))
+                except:
+                    pass
+                try:
+                    pre_output_17.append((Alphabet_Letters[distances_kaze[7].index(min(distances_kaze_cn_i))]))
+                except:
+                    pass
+                try:
+                    pre_output_18.append((Alphabet_Letters[distances_kaze[8].index(min(distances_kaze_c_i))]))
+                except:
+                    pass
+                try:
+                    pre_output_19.append((Alphabet_Letters[distances_kaze[9].index(min(distances_kaze_cs_i))]))
+                except:
+                    pass
+            if flag_b == 1:
+                try:
+                    pre_output_10.append((Alphabet_Letters[distances_brisk[10].index(min(distances_brisk_a_b))]))
+                except:
+                    pass
+                try:
+                    pre_output_11.append((Alphabet_Letters[distances_brisk[11].index(min(distances_brisk_tnr_b))]))
+                except:
+                    pass
+                try:
+                    pre_output_12.append((Alphabet_Letters[distances_brisk[12].index(min(distances_brisk_cn_b))]))
+                except:
+                    pass
+                try:
+                    pre_output_13.append((Alphabet_Letters[distances_brisk[13].index(min(distances_brisk_c_b))]))
+                except:
+                    pass
+                try:
+                    pre_output_14.append((Alphabet_Letters[distances_brisk[14].index(min(distances_brisk_cs_b))]))
+                except:
+                    pass
+                try:
+                    pre_output_15.append((Alphabet_Letters[distances_kaze[10].index(min(distances_kaze_a_b))]))
+                except:
+                    pass
+                try:
+                    pre_output_16.append((Alphabet_Letters[distances_kaze[11].index(min(distances_kaze_tnr_b))]))
+                except:
+                    pass
+                try:
+                    pre_output_17.append((Alphabet_Letters[distances_kaze[12].index(min(distances_kaze_cn_b))]))
+                except:
+                    pass
+                try:
+                    pre_output_18.append((Alphabet_Letters[distances_kaze[13].index(min(distances_kaze_c_b))]))
+                except:
+                    pass
+                try:
+                    pre_output_19.append((Alphabet_Letters[distances_kaze[14].index(min(distances_kaze_cs_b))]))
+                except:
+                    pass
+        z = z + 1
+        # return background.convert('RGB')
+
+    # resize_with_pad_v2(im, w + 40, h + 40)
+    print(k, "from", number_of_found_letters)
 
 print()
 
