@@ -153,6 +153,7 @@ for alphabet in Alphabets_pad:
     iterator_empty += 1
 # searching all shapes in the input image
 no_gray = cv2.imread(filename='test3.png')
+pic2 = cv2.imread(filename='test3.png')
 gray = cv2.imread(filename='test3.png', flags=cv2.IMREAD_GRAYSCALE)
 gray = np.array(gray)
 height, width = gray.shape
@@ -167,6 +168,7 @@ ret, binary = cv2.threshold(gray, threshold, 255, cv2.THRESH_OTSU)
 inverted_binary = ~binary
 contours, hierarchy = cv2.findContours(inverted_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+'''
 ret, mask = cv2.threshold(gray, 255, 50, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 kernel = np.ones((9,9), np.uint8)
 mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
@@ -179,6 +181,71 @@ result[:, :, 3] = mask
 
 # save resulting masked image
 cv2.imwrite('retina_masked.png', result)
+'''
+
+'''
+def get_grayscale(image):
+    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+
+# noise removal
+def remove_noise(image):
+    return cv2.medianBlur(image, 5)
+
+
+# thresholding
+def thresholding(image):
+    return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+
+# dilation
+def dilate(image):
+    kernel = np.ones((5, 5), np.uint8)
+    return cv2.dilate(image, kernel, iterations=1)
+
+
+# erosion
+def erode(image):
+    kernel = np.ones((5, 5), np.uint8)
+    return cv2.erode(image, kernel, iterations=1)
+
+
+# opening - erosion followed by dilation
+def opening(image):
+    kernel = np.ones((5, 5), np.uint8)
+    return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+
+
+# canny edge detection
+def canny(image):
+    return cv2.Canny(image, 100, 200)
+
+
+# skew correction
+def deskew(image):
+    coords = np.column_stack(np.where(image > 0))
+    angle = cv2.minAreaRect(coords)[-1]
+    if angle < -45:
+        angle = -(90 + angle)
+    else:
+        angle = -angle
+    (h, w) = image.shape[:2]
+    center = (w // 2, h // 2)
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+    rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    return rotated
+
+
+# template matching
+def match_template(image, template):
+    return cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
+
+
+gray = get_grayscale(image)
+thresh = thresholding(gray)
+opening = opening(gray)
+canny = canny(gray)
+'''
 '''
 def segmentation(gray2):  # image segmentation
     rng.seed(12345)
@@ -280,7 +347,8 @@ segmentation(no_gray)
 # deleting shapes included in bigger ones
 k = 0
 found_letter = []
-
+found_best = []
+found_best_r = []
 for c in contours:
     found_letter.append(c)
 
@@ -291,8 +359,9 @@ def selection(contours_sel):
         iter1 = iter1 + 1
         iter2 = 0
         xs, ys, ws, hs = cv2.boundingRect(cs)
-        if w < 10 or h < 5:
-            found_letter.pop()
+        found_best.append(cs)
+        # if w < 10 or h < 5:
+            # found_letter[iter2].
         for ds in contours_sel:
             iter2 = iter2 + 1
             if iter1 == iter2:
@@ -300,13 +369,73 @@ def selection(contours_sel):
             else:
                 xs2, ys2, ws2, hs2 = cv2.boundingRect(ds)
                 if (xs >= xs2) and ((xs + ws) <= (xs2 + ws2)) and (ys >= ys2) and ((ys + hs) <= (ys2 + hs2)):
-                    found_letter.pop()
+                    found_best.pop()
                     pass
 
 
+def rev_selection(r_contours_sel):
+    iter1 = 0
+    for cs in reversed(r_contours_sel):
+        iter1 = iter1 + 1
+        iter2 = 0
+        xs, ys, ws, hs = cv2.boundingRect(cs)
+        found_best_r.append(cs)
+        #if w < 10 or h < 5:
+            #found_letter.pop()
+        for ds in r_contours_sel:
+            iter2 = iter2 + 1
+            if iter1 == iter2:
+                pass
+            else:
+                xs2, ys2, ws2, hs2 = cv2.boundingRect(ds)
+                if (xs >= xs2) and ((xs + ws) <= (xs2 + ws2)) and (ys >= ys2) and ((ys + hs) <= (ys2 + hs2)):
+                    found_best_r.pop()
+                    pass
+
+
+pic1 = no_gray
 selection(found_letter)
-number_of_found_letters = len(found_letter)  # number of found shapes
+number_of_found_letters = len(found_best)  # number of found shapes
 print("OCR have found ", number_of_found_letters, " letters")
+found_better = []
+
+for c in found_best:
+    x, y, w, h = cv2.boundingRect(c)
+    found_better.append(c)
+    if (cv2.contourArea(c)) > 100:
+        cv2.rectangle(pic1, (x, y), (x + w, y + h), (77, 22, 174), 2)
+    else:
+        found_better.pop()
+cv2.imwrite('All contours with bounding box.png', pic1)
+number_of_found_letters = len(found_better)  # number of found shapes
+print("OCR have found ", number_of_found_letters, " letters")
+
+
+mser = cv2.MSER_create()
+gray_pic2 = cv2.cvtColor(pic2, cv2.COLOR_BGR2GRAY)
+vis = pic2.copy()
+regions, _ = mser.detectRegions(gray_pic2)
+hulls = [cv2.convexHull(p.reshape(-1, 1, 2)) for p in regions]
+cv2.polylines(vis, hulls, 1, (0, 255, 0))
+
+mask = np.zeros((pic2.shape[0], pic2.shape[1], 1), dtype=np.uint8)
+mask = cv2.dilate(mask, np.ones((150, 150), np.uint8))
+for contour in hulls:
+    cv2.drawContours(mask, [contour], -1, (25, 25, 55), -1)
+    x, y, w, h = cv2.boundingRect(contour)
+    new_img = Image.new('RGBA', (w, h), (255, 255, 255, 0))
+    im = pic2[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]
+    im = Image.fromarray(im)
+    im.paste(pic2, new_img)
+    im.save('try2.png')
+    im = cv2.imread('try2.png')
+    cv2.imshow('try2.png', im)
+    text_only = cv2.bitwise_and(pic2, pic2, mask=mask)
+cv2.imwrite('try1.png', text_only)
+regions, _ = mser.detectRegions(gray_pic2)
+
+bounding_boxes = [cv2.boundingRect(p.reshape(-1, 1, 2)) for p in regions]
+cv2.imwrite('try2.png', bounding_boxes)
 # creating vectors for output
 pre_output_0 = []
 pre_output_1 = []
@@ -354,12 +483,14 @@ def resize_with_pad(image, target_width, target_height, pr):  # function adding 
 
 
 p = 0
-for c in found_letter:
+for c in found_better:
     x, y, w, h = cv2.boundingRect(c)
     p = p + 1
     im = gray[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]  # cutting shapes from input image
     cv2.imwrite('found/found_letter_' + str(p) + '.png', im)
 
+
+    '''
     mask = np.zeros(im.shape[:3], dtype=np.uint8)
 
     # loop through the contours
@@ -370,6 +501,7 @@ for c in found_letter:
             if cv2.contourArea(cnt) > 10:
                 cv2.drawContours(mask, [cnt], 0, 255, -1)
     mask = ~mask
+    '''
     '''
     im = ~im
     ret, mask = cv2.threshold(im, 245, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -383,7 +515,7 @@ for c in found_letter:
     result = ~result
     found_letter_v2.append(result)
     '''
-    im = Image.fromarray(mask)
+    im = Image.fromarray(im)
     # result = Image.fromarray(result)
     im2 = cv2.imread('found/found_letter_' + str(p) + '.png')
 
