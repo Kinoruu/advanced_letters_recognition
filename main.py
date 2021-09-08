@@ -59,8 +59,8 @@ except FileExistsError:
         for f in files:
             os.unlink(os.path.join(root, f))
 # flags and changeable elements
-flag_i = 0  # italic flag
-flag_b = 0  # bold flag
+flag_i = 1  # italic flag
+flag_b = 1  # bold flag
 mean_range = 4  # best possible choosed
 flag_geometric_mean = 1
 flag_mean = 0
@@ -426,16 +426,16 @@ for contour in hulls:
     new_img = Image.new('RGBA', (w, h), (255, 255, 255, 0))
     im = pic2[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]
     im = Image.fromarray(im)
-    im.paste(pic2, new_img)
+    # im.paste(pic2, new_img)
     im.save('try2.png')
     im = cv2.imread('try2.png')
-    cv2.imshow('try2.png', im)
+    # cv2.imshow('try2.png', im)
     text_only = cv2.bitwise_and(pic2, pic2, mask=mask)
 cv2.imwrite('try1.png', text_only)
 regions, _ = mser.detectRegions(gray_pic2)
 
 bounding_boxes = [cv2.boundingRect(p.reshape(-1, 1, 2)) for p in regions]
-cv2.imwrite('try2.png', bounding_boxes)
+#cv2.imwrite('try2.png', bounding_boxes)
 # creating vectors for output
 pre_output_0 = []
 pre_output_1 = []
@@ -527,6 +527,17 @@ for flp in found_letter_pad:
 for c in contours:
     found_letter_v2.append(c)
 '''
+
+
+def check_if(pre_output_list, method_list, alphabet_list):
+    try:
+        pre_output_list.append((Alphabet_Letters[method_list.index(min(alphabet_list))]))
+    except:
+        pass
+
+
+
+
 number_of_found_letters_v2 = len(found_letter_v2)  # number of found shapes
 print("OCR have found ", number_of_found_letters_v2, " letters")
 # main part of program
@@ -757,10 +768,22 @@ for fl in found_letter_pad:
             alphabets_iterator = alphabets_iterator + 1
 
         if iterator == 25:
+            check_if(pre_output_0, distances_brisk[0], distances_brisk_a)
+            check_if(pre_output_1, distances_brisk[1], distances_brisk_tnr)
+            check_if(pre_output_2, distances_brisk[2], distances_brisk_cn)
+            check_if(pre_output_3, distances_brisk[3], distances_brisk_c)
+            check_if(pre_output_4, distances_brisk[4], distances_brisk_cs)
+            check_if(pre_output_5, distances_kaze[0], distances_kaze_a)
+            check_if(pre_output_6, distances_kaze[1], distances_kaze_tnr)
+            check_if(pre_output_7, distances_kaze[2], distances_kaze_cn)
+            check_if(pre_output_8, distances_kaze[3], distances_kaze_c)
+            check_if(pre_output_9, distances_kaze[4], distances_kaze_cs)
+            '''
             try:
                 pre_output_0.append((Alphabet_Letters[distances_brisk[0].index(min(distances_brisk_a))]))
             except:
                 pass
+            
             try:
                 pre_output_1.append((Alphabet_Letters[distances_brisk[1].index(min(distances_brisk_tnr))]))
             except:
@@ -797,7 +820,19 @@ for fl in found_letter_pad:
                 pre_output_9.append((Alphabet_Letters[distances_kaze[4].index(min(distances_kaze_cs))]))
             except:
                 pass
+            '''
             if flag_i == 1:
+                check_if(pre_output_10, distances_brisk[5], distances_brisk_a_i)
+                check_if(pre_output_11, distances_brisk[6], distances_brisk_tnr_i)
+                check_if(pre_output_12, distances_brisk[7], distances_brisk_cn_i)
+                check_if(pre_output_13, distances_brisk[8], distances_brisk_c_i)
+                check_if(pre_output_14, distances_brisk[9], distances_brisk_cs_i)
+                check_if(pre_output_15, distances_kaze[5], distances_kaze_a_i)
+                check_if(pre_output_16, distances_kaze[6], distances_kaze_tnr_i)
+                check_if(pre_output_17, distances_kaze[7], distances_kaze_cn_i)
+                check_if(pre_output_18, distances_kaze[8], distances_kaze_c_i)
+                check_if(pre_output_19, distances_kaze[9], distances_kaze_cs_i)
+                '''
                 try:
                     pre_output_10.append((Alphabet_Letters[distances_brisk[5].index(min(distances_brisk_a_i))]))
                 except:
@@ -838,7 +873,19 @@ for fl in found_letter_pad:
                     pre_output_19.append((Alphabet_Letters[distances_kaze[9].index(min(distances_kaze_cs_i))]))
                 except:
                     pass
+                '''
             if flag_b == 1:
+                check_if(pre_output_20, distances_brisk[10], distances_brisk_a_b)
+                check_if(pre_output_21, distances_brisk[11], distances_brisk_tnr_b)
+                check_if(pre_output_22, distances_brisk[12], distances_brisk_cn_b)
+                check_if(pre_output_23, distances_brisk[13], distances_brisk_c_b)
+                check_if(pre_output_24, distances_brisk[14], distances_brisk_cs_b)
+                check_if(pre_output_25, distances_kaze[10], distances_kaze_a_b)
+                check_if(pre_output_26, distances_kaze[11], distances_kaze_tnr_b)
+                check_if(pre_output_27, distances_kaze[12], distances_kaze_cn_b)
+                check_if(pre_output_28, distances_kaze[13], distances_kaze_c_b)
+                check_if(pre_output_29, distances_kaze[14], distances_kaze_cs_b)
+                '''
                 try:
                     pre_output_10.append((Alphabet_Letters[distances_brisk[10].index(min(distances_brisk_a_b))]))
                 except:
@@ -879,6 +926,7 @@ for fl in found_letter_pad:
                     pre_output_19.append((Alphabet_Letters[distances_kaze[14].index(min(distances_kaze_cs_b))]))
                 except:
                     pass
+                '''
         z = z + 1
         # return background.convert('RGB')
 
@@ -941,7 +989,9 @@ for letter_x in range(len(Final_output)):
     print(Final_output[letter_x], sep=' ', end='', flush=True)
     text_file.write(Final_output[letter_x])
 print()
+'''
 Final_output.reverse()
 for letter_x in range(len(Final_output)):
     print(Final_output[letter_x], sep=' ', end='', flush=True)
     text_file.write(Final_output[letter_x])
+'''

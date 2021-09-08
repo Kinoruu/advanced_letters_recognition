@@ -18,7 +18,11 @@ Comic_S_Letters_bold = []
 Calibri_Letters = []
 Calibri_Letters_italic = []
 Calibri_Letters_bold = []
+Alef_Letters = []
+Alef_Letters_italic = []
+Alef_Letters_bold = []
 
+'''
 l_a = cv2.imread(filename='alphabet_arial/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Arial_Letters.append(l_a)
 letters.append("a")
@@ -203,7 +207,7 @@ l_y = cv2.imread(filename='alphabet_arial_bold/y.png', flags=cv2.IMREAD_GRAYSCAL
 Arial_Letters_bold.append(l_y)
 l_z = cv2.imread(filename='alphabet_arial_bold/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Arial_Letters_bold.append(l_z)
-
+'''
 l_a = cv2.imread(filename='alphabet_times_new_roman/a.png', flags=cv2.IMREAD_GRAYSCALE)
 Times_NR_Letters.append(l_a)
 l_b = cv2.imread(filename='alphabet_times_new_roman/b.png', flags=cv2.IMREAD_GRAYSCALE)
@@ -839,3 +843,71 @@ l_y = cv2.imread(filename='alphabet_comic_sans_bold/y.png', flags=cv2.IMREAD_GRA
 Comic_S_Letters_bold.append(l_y)
 l_z = cv2.imread(filename='alphabet_comic_sans_bold/z.png', flags=cv2.IMREAD_GRAYSCALE)
 Comic_S_Letters_bold.append(l_z)
+
+# adding next 5 alphabets
+
+
+def import_letters_of_alphabet(folder_name):
+    for i in range(26):
+        list_name = []
+        l_a_f = cv2.imread(filename=folder_name + '/a.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_a_f)
+        l_b_f = cv2.imread(filename=folder_name + '/b.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_b_f)
+        l_c_f = cv2.imread(filename=folder_name + '/c.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_c_f)
+        l_d_f = cv2.imread(filename=folder_name + '/d.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_d_f)
+        l_e_f = cv2.imread(filename=folder_name + '/e.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_e_f)
+        l_f_f = cv2.imread(filename=folder_name + '/f.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_f_f)
+        l_g_f = cv2.imread(filename=folder_name + '/g.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_g_f)
+        l_h_f = cv2.imread(filename=folder_name + '/h.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_h_f)
+        l_i_f = cv2.imread(filename=folder_name + '/i.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_i_f)
+        l_j_f = cv2.imread(filename=folder_name + '/j.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_j_f)
+        l_k_f = cv2.imread(filename=folder_name + '/k.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_k_f)
+        l_l_f = cv2.imread(filename=folder_name + '/l.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_l_f)
+        l_m_f = cv2.imread(filename=folder_name + '/m.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_m_f)
+        l_n_f = cv2.imread(filename=folder_name + '/n.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_n_f)
+        l_o_f = cv2.imread(filename=folder_name + '/o.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_o_f)
+        l_p_f = cv2.imread(filename=folder_name + '/p.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_p_f)
+        l_q_f = cv2.imread(filename=folder_name + '/q.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_q_f)
+        l_r_f = cv2.imread(filename=folder_name + '/r.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_r_f)
+        l_s_f = cv2.imread(filename=folder_name + '/s.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_s_f)
+        l_t_f = cv2.imread(filename=folder_name + '/t.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_t_f)
+        l_u_f = cv2.imread(filename=folder_name + '/u.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_u_f)
+        l_v_f = cv2.imread(filename=folder_name + '/v.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_v_f)
+        l_w_f = cv2.imread(filename=folder_name + '/w.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_w_f)
+        l_x_f = cv2.imread(filename=folder_name + '/x.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_x_f)
+        l_y_f = cv2.imread(filename=folder_name + '/y.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_y_f)
+        l_z_f = cv2.imread(filename=folder_name + '/z.png', flags=cv2.IMREAD_GRAYSCALE)
+        list_name.append(l_z_f)
+
+
+import_letters_of_alphabet("alphabet_alef")
+Alef_Letters_italic = import_letters_of_alphabet("alphabet_alef_italic")
+Alef_Letters_bold = import_letters_of_alphabet("alphabet_alef_bold")
+
+import_letters_of_alphabet("alphabet_arial")
+import_letters_of_alphabet("alphabet_arial_italic")
+import_letters_of_alphabet("alphabet_arial_bold")
