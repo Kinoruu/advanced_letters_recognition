@@ -70,44 +70,47 @@ width_pad = 2  # best possible choosed
 threshold = 245  # best possible choosed
 # creating vectors for alphabets and importing from "import_letters.py"
 Alphabets = [letters_import.Arial_Letters, letters_import.Times_NR_Letters, letters_import.Courier_N_Letters,
-             letters_import.Calibri_Letters, letters_import.Comic_S_Letters]
+             letters_import.Calibri_Letters, letters_import.Comic_S_Letters, letters_import.Alef_Letters]
 if flag_i == 1:
     Alphabets.append(letters_import.Arial_Letters_italic)
     Alphabets.append(letters_import.Times_NR_Letters_italic)
     Alphabets.append(letters_import.Courier_N_Letters_italic)
     Alphabets.append(letters_import.Calibri_Letters_italic)
     Alphabets.append(letters_import.Comic_S_Letters_italic)
+    Alphabets.append(letters_import.Alef_Letters_italic)
 if flag_b == 1:
     Alphabets.append(letters_import.Arial_Letters_bold)
     Alphabets.append(letters_import.Times_NR_Letters_bold)
     Alphabets.append(letters_import.Courier_N_Letters_bold)
     Alphabets.append(letters_import.Calibri_Letters_bold)
     Alphabets.append(letters_import.Comic_S_Letters_bold)
+    Alphabets.append(letters_import.Alef_Letters_bold)
 Alphabet_Letters = letters_import.letters
-alphabets_names = ["Arial_Letters", "Times_NR_Letters", "Courier_N_Letters", "Calibri_Letters", "Comic_S_Letters"]
+alphabets_names = ["Arial_Letters", "Times_NR_Letters", "Courier_N_Letters", "Calibri_Letters", "Comic_S_Letters",
+                   "Alef_Letters"]
 if flag_i == 1:
     alphabets_names.append("Arial_Letters_italic")
     alphabets_names.append("Times_NR_Letters_italic")
     alphabets_names.append("Courier_N_Letters_italic")
     alphabets_names.append("Calibri_Letters_italic")
     alphabets_names.append("Comic_S_Letters_italic")
+    alphabets_names.append("Alef_Letters_italic")
 if flag_b == 1:
     alphabets_names.append("Arial_Letters_bold")
     alphabets_names.append("Times_NR_Letters_bold")
     alphabets_names.append("Courier_N_Letters_bold")
     alphabets_names.append("Calibri_Letters_bold")
     alphabets_names.append("Comic_S_Letters_bold")
+    alphabets_names.append("Alef_Letters_bold")
 Alphabets_pad = []
 Arial_Letters_no_pad = []
-Alphabets_pad.append(Arial_Letters_no_pad)
 Times_NR_Letters_no_pad = []
-Alphabets_pad.append(Times_NR_Letters_no_pad)
 Courier_N_Letters_no_pad = []
-Alphabets_pad.append(Courier_N_Letters_no_pad)
 Comic_S_Letters_no_pad = []
-Alphabets_pad.append(Comic_S_Letters_no_pad)
 Calibri_Letters_no_pad = []
-Alphabets_pad.append(Calibri_Letters_no_pad)
+Alef_Letters_no_pad = []
+Alphabets_pad = [Arial_Letters_no_pad, Times_NR_Letters_no_pad, Courier_N_Letters_no_pad, Comic_S_Letters_no_pad,
+                 Calibri_Letters_no_pad, Alef_Letters_no_pad]
 if flag_i == 1:
     Arial_Letters_italic_no_pad = []
     Alphabets_pad.append(Arial_Letters_italic_no_pad)
@@ -119,6 +122,8 @@ if flag_i == 1:
     Alphabets_pad.append(Comic_S_Letters_italic_no_pad)
     Calibri_Letters_italic_no_pad = []
     Alphabets_pad.append(Calibri_Letters_italic_no_pad)
+    Alef_Letters_italic_no_pad = []
+    Alphabets_pad.append(Alef_Letters_italic_no_pad)
 if flag_b == 1:
     Arial_Letters_bold_no_pad = []
     Alphabets_pad.append(Arial_Letters_bold_no_pad)
@@ -130,6 +135,8 @@ if flag_b == 1:
     Alphabets_pad.append(Comic_S_Letters_bold_no_pad)
     Calibri_Letters_bold_no_pad = []
     Alphabets_pad.append(Calibri_Letters_bold_no_pad)
+    Alef_Letters_bold_no_pad = []
+    Alphabets_pad.append(Alef_Letters_bold_no_pad)
 # adding pads to libraries alphabets letters
 iterator_empty = 0
 for alphabet in Alphabets_pad:
@@ -467,6 +474,13 @@ pre_output_26 = []
 pre_output_27 = []
 pre_output_28 = []
 pre_output_29 = []
+pre_output_30 = []
+pre_output_31 = []
+pre_output_32 = []
+pre_output_33 = []
+pre_output_34 = []
+pre_output_35 = []
+
 program_output = []
 
 found_letter_pad = []
@@ -559,72 +573,74 @@ for fl in found_letter_pad:
     background.save('found_pad_v2/found_letter_pad_' + str(k) + '.png')
     '''
     z = 0  # iterator for naming images containing matches
-    distances_kaze = []
     distances_kaze_a = []
-    distances_kaze.append(distances_kaze_a)
     distances_kaze_tnr = []
-    distances_kaze.append(distances_kaze_tnr)
     distances_kaze_cn = []
-    distances_kaze.append(distances_kaze_cn)
     distances_kaze_c = []
-    distances_kaze.append(distances_kaze_c)
     distances_kaze_cs = []
-    distances_kaze.append(distances_kaze_cs)
+    distances_kaze_al = []
+    distances_kaze = [distances_kaze_a, distances_kaze_tnr, distances_kaze_cn, distances_kaze_c, distances_kaze_cs,
+                      distances_kaze_al]
     distances_kaze_a_i = []
     distances_kaze_tnr_i = []
     distances_kaze_cn_i = []
     distances_kaze_c_i = []
     distances_kaze_cs_i = []
+    distances_kaze_al_i = []
     distances_kaze_a_b = []
     distances_kaze_tnr_b = []
     distances_kaze_cn_b = []
     distances_kaze_c_b = []
     distances_kaze_cs_b = []
+    distances_kaze_al_b = []
     if flag_i == 1:
         distances_kaze.append(distances_kaze_a_i)
         distances_kaze.append(distances_kaze_tnr_i)
         distances_kaze.append(distances_kaze_cn_i)
         distances_kaze.append(distances_kaze_c_i)
         distances_kaze.append(distances_kaze_cs_i)
+        distances_kaze.append(distances_kaze_al_i)
     if flag_b == 1:
         distances_kaze.append(distances_kaze_a_b)
         distances_kaze.append(distances_kaze_tnr_b)
         distances_kaze.append(distances_kaze_cn_b)
         distances_kaze.append(distances_kaze_c_b)
         distances_kaze.append(distances_kaze_cs_b)
-    distances_brisk = []
+        distances_kaze.append(distances_kaze_al_b)
     distances_brisk_a = []
-    distances_brisk.append(distances_brisk_a)
     distances_brisk_tnr = []
-    distances_brisk.append(distances_brisk_tnr)
     distances_brisk_cn = []
-    distances_brisk.append(distances_brisk_cn)
     distances_brisk_c = []
-    distances_brisk.append(distances_brisk_c)
     distances_brisk_cs = []
-    distances_brisk.append(distances_brisk_cs)
+    distances_brisk_al = []
+    distances_brisk = [distances_brisk_a, distances_brisk_tnr, distances_brisk_cn, distances_brisk_c, distances_brisk_cs
+                       , distances_brisk_al]
     distances_brisk_a_i = []
     distances_brisk_tnr_i = []
     distances_brisk_cn_i = []
     distances_brisk_c_i = []
     distances_brisk_cs_i = []
+    distances_brisk_al_i = []
     distances_brisk_a_b = []
     distances_brisk_tnr_b = []
     distances_brisk_cn_b = []
     distances_brisk_c_b = []
     distances_brisk_cs_b = []
+    distances_brisk_al_b = []
     if flag_i == 1:
         distances_brisk.append(distances_brisk_a_i)
         distances_brisk.append(distances_brisk_tnr_i)
         distances_brisk.append(distances_brisk_cn_i)
         distances_brisk.append(distances_brisk_c_i)
         distances_brisk.append(distances_brisk_cs_i)
+        distances_brisk.append(distances_brisk_al_i)
     if flag_b == 1:
         distances_brisk.append(distances_brisk_a_b)
         distances_brisk.append(distances_brisk_tnr_b)
         distances_brisk.append(distances_brisk_cn_b)
         distances_brisk.append(distances_brisk_c_b)
         distances_brisk.append(distances_brisk_cs_b)
+        distances_brisk.append(distances_brisk_al_b)
     # main comparison loop
     for iterator in range(26):
         alphabets_iterator = 0
@@ -773,160 +789,39 @@ for fl in found_letter_pad:
             check_if(pre_output_2, distances_brisk[2], distances_brisk_cn)
             check_if(pre_output_3, distances_brisk[3], distances_brisk_c)
             check_if(pre_output_4, distances_brisk[4], distances_brisk_cs)
+            check_if(pre_output_30, distances_brisk[5], distances_brisk_al)
             check_if(pre_output_5, distances_kaze[0], distances_kaze_a)
             check_if(pre_output_6, distances_kaze[1], distances_kaze_tnr)
             check_if(pre_output_7, distances_kaze[2], distances_kaze_cn)
             check_if(pre_output_8, distances_kaze[3], distances_kaze_c)
             check_if(pre_output_9, distances_kaze[4], distances_kaze_cs)
-            '''
-            try:
-                pre_output_0.append((Alphabet_Letters[distances_brisk[0].index(min(distances_brisk_a))]))
-            except:
-                pass
-            
-            try:
-                pre_output_1.append((Alphabet_Letters[distances_brisk[1].index(min(distances_brisk_tnr))]))
-            except:
-                pass
-            try:
-                pre_output_2.append((Alphabet_Letters[distances_brisk[2].index(min(distances_brisk_cn))]))
-            except:
-                pass
-            try:
-                pre_output_3.append((Alphabet_Letters[distances_brisk[3].index(min(distances_brisk_c))]))
-            except:
-                pass
-            try:
-                pre_output_4.append((Alphabet_Letters[distances_brisk[4].index(min(distances_brisk_cs))]))
-            except:
-                pass
-            try:
-                pre_output_5.append((Alphabet_Letters[distances_kaze[0].index(min(distances_kaze_a))]))
-            except:
-                pass
-            try:
-                pre_output_6.append((Alphabet_Letters[distances_kaze[1].index(min(distances_kaze_tnr))]))
-            except:
-                pass
-            try:
-                pre_output_7.append((Alphabet_Letters[distances_kaze[2].index(min(distances_kaze_cn))]))
-            except:
-                pass
-            try:
-                pre_output_8.append((Alphabet_Letters[distances_kaze[3].index(min(distances_kaze_c))]))
-            except:
-                pass
-            try:
-                pre_output_9.append((Alphabet_Letters[distances_kaze[4].index(min(distances_kaze_cs))]))
-            except:
-                pass
-            '''
+            check_if(pre_output_31, distances_kaze[5], distances_kaze_al)
             if flag_i == 1:
-                check_if(pre_output_10, distances_brisk[5], distances_brisk_a_i)
-                check_if(pre_output_11, distances_brisk[6], distances_brisk_tnr_i)
-                check_if(pre_output_12, distances_brisk[7], distances_brisk_cn_i)
-                check_if(pre_output_13, distances_brisk[8], distances_brisk_c_i)
-                check_if(pre_output_14, distances_brisk[9], distances_brisk_cs_i)
-                check_if(pre_output_15, distances_kaze[5], distances_kaze_a_i)
-                check_if(pre_output_16, distances_kaze[6], distances_kaze_tnr_i)
-                check_if(pre_output_17, distances_kaze[7], distances_kaze_cn_i)
-                check_if(pre_output_18, distances_kaze[8], distances_kaze_c_i)
-                check_if(pre_output_19, distances_kaze[9], distances_kaze_cs_i)
-                '''
-                try:
-                    pre_output_10.append((Alphabet_Letters[distances_brisk[5].index(min(distances_brisk_a_i))]))
-                except:
-                    pass
-                try:
-                    pre_output_11.append((Alphabet_Letters[distances_brisk[6].index(min(distances_brisk_tnr_i))]))
-                except:
-                    pass
-                try:
-                    pre_output_12.append((Alphabet_Letters[distances_brisk[7].index(min(distances_brisk_cn_i))]))
-                except:
-                    pass
-                try:
-                    pre_output_13.append((Alphabet_Letters[distances_brisk[8].index(min(distances_brisk_c_i))]))
-                except:
-                    pass
-                try:
-                    pre_output_14.append((Alphabet_Letters[distances_brisk[9].index(min(distances_brisk_cs_i))]))
-                except:
-                    pass
-                try:
-                    pre_output_15.append((Alphabet_Letters[distances_kaze[5].index(min(distances_kaze_a_i))]))
-                except:
-                    pass
-                try:
-                    pre_output_16.append((Alphabet_Letters[distances_kaze[6].index(min(distances_kaze_tnr_i))]))
-                except:
-                    pass
-                try:
-                    pre_output_17.append((Alphabet_Letters[distances_kaze[7].index(min(distances_kaze_cn_i))]))
-                except:
-                    pass
-                try:
-                    pre_output_18.append((Alphabet_Letters[distances_kaze[8].index(min(distances_kaze_c_i))]))
-                except:
-                    pass
-                try:
-                    pre_output_19.append((Alphabet_Letters[distances_kaze[9].index(min(distances_kaze_cs_i))]))
-                except:
-                    pass
-                '''
+                check_if(pre_output_10, distances_brisk[6], distances_brisk_a_i)
+                check_if(pre_output_11, distances_brisk[7], distances_brisk_tnr_i)
+                check_if(pre_output_12, distances_brisk[8], distances_brisk_cn_i)
+                check_if(pre_output_13, distances_brisk[9], distances_brisk_c_i)
+                check_if(pre_output_14, distances_brisk[10], distances_brisk_cs_i)
+                check_if(pre_output_32, distances_brisk[11], distances_brisk_al)
+                check_if(pre_output_15, distances_kaze[6], distances_kaze_a_i)
+                check_if(pre_output_16, distances_kaze[7], distances_kaze_tnr_i)
+                check_if(pre_output_17, distances_kaze[8], distances_kaze_cn_i)
+                check_if(pre_output_18, distances_kaze[9], distances_kaze_c_i)
+                check_if(pre_output_19, distances_kaze[10], distances_kaze_cs_i)
+                check_if(pre_output_33, distances_kaze[11], distances_kaze_al_i)
             if flag_b == 1:
-                check_if(pre_output_20, distances_brisk[10], distances_brisk_a_b)
-                check_if(pre_output_21, distances_brisk[11], distances_brisk_tnr_b)
-                check_if(pre_output_22, distances_brisk[12], distances_brisk_cn_b)
-                check_if(pre_output_23, distances_brisk[13], distances_brisk_c_b)
-                check_if(pre_output_24, distances_brisk[14], distances_brisk_cs_b)
-                check_if(pre_output_25, distances_kaze[10], distances_kaze_a_b)
-                check_if(pre_output_26, distances_kaze[11], distances_kaze_tnr_b)
-                check_if(pre_output_27, distances_kaze[12], distances_kaze_cn_b)
-                check_if(pre_output_28, distances_kaze[13], distances_kaze_c_b)
-                check_if(pre_output_29, distances_kaze[14], distances_kaze_cs_b)
-                '''
-                try:
-                    pre_output_10.append((Alphabet_Letters[distances_brisk[10].index(min(distances_brisk_a_b))]))
-                except:
-                    pass
-                try:
-                    pre_output_11.append((Alphabet_Letters[distances_brisk[11].index(min(distances_brisk_tnr_b))]))
-                except:
-                    pass
-                try:
-                    pre_output_12.append((Alphabet_Letters[distances_brisk[12].index(min(distances_brisk_cn_b))]))
-                except:
-                    pass
-                try:
-                    pre_output_13.append((Alphabet_Letters[distances_brisk[13].index(min(distances_brisk_c_b))]))
-                except:
-                    pass
-                try:
-                    pre_output_14.append((Alphabet_Letters[distances_brisk[14].index(min(distances_brisk_cs_b))]))
-                except:
-                    pass
-                try:
-                    pre_output_15.append((Alphabet_Letters[distances_kaze[10].index(min(distances_kaze_a_b))]))
-                except:
-                    pass
-                try:
-                    pre_output_16.append((Alphabet_Letters[distances_kaze[11].index(min(distances_kaze_tnr_b))]))
-                except:
-                    pass
-                try:
-                    pre_output_17.append((Alphabet_Letters[distances_kaze[12].index(min(distances_kaze_cn_b))]))
-                except:
-                    pass
-                try:
-                    pre_output_18.append((Alphabet_Letters[distances_kaze[13].index(min(distances_kaze_c_b))]))
-                except:
-                    pass
-                try:
-                    pre_output_19.append((Alphabet_Letters[distances_kaze[14].index(min(distances_kaze_cs_b))]))
-                except:
-                    pass
-                '''
+                check_if(pre_output_20, distances_brisk[12], distances_brisk_a_b)
+                check_if(pre_output_21, distances_brisk[13], distances_brisk_tnr_b)
+                check_if(pre_output_22, distances_brisk[14], distances_brisk_cn_b)
+                check_if(pre_output_23, distances_brisk[15], distances_brisk_c_b)
+                check_if(pre_output_24, distances_brisk[16], distances_brisk_cs_b)
+                check_if(pre_output_34, distances_brisk[17], distances_brisk_al_b)
+                check_if(pre_output_25, distances_kaze[12], distances_kaze_a_b)
+                check_if(pre_output_26, distances_kaze[13], distances_kaze_tnr_b)
+                check_if(pre_output_27, distances_kaze[14], distances_kaze_cn_b)
+                check_if(pre_output_28, distances_kaze[15], distances_kaze_c_b)
+                check_if(pre_output_29, distances_kaze[16], distances_kaze_cs_b)
+                check_if(pre_output_35, distances_kaze[17], distances_kaze_al_b)
         z = z + 1
         # return background.convert('RGB')
 
@@ -936,7 +831,7 @@ for fl in found_letter_pad:
 print()
 
 Pre_outputs = [pre_output_0, pre_output_1, pre_output_2, pre_output_3, pre_output_4, pre_output_5, pre_output_6,
-               pre_output_7, pre_output_8, pre_output_9]
+               pre_output_7, pre_output_8, pre_output_9, pre_output_30, pre_output_31]
 if flag_i == 1:
     Pre_outputs.append(pre_output_10)
     Pre_outputs.append(pre_output_11)
@@ -948,6 +843,8 @@ if flag_i == 1:
     Pre_outputs.append(pre_output_17)
     Pre_outputs.append(pre_output_18)
     Pre_outputs.append(pre_output_19)
+    Pre_outputs.append(pre_output_32)
+    Pre_outputs.append(pre_output_33)
 if flag_b == 1:
     Pre_outputs.append(pre_output_20)
     Pre_outputs.append(pre_output_21)
@@ -959,6 +856,8 @@ if flag_b == 1:
     Pre_outputs.append(pre_output_27)
     Pre_outputs.append(pre_output_28)
     Pre_outputs.append(pre_output_29)
+    Pre_outputs.append(pre_output_34)
+    Pre_outputs.append(pre_output_35)
 
 Semi_final_output = [[] * len(Pre_outputs) for i in range(len(Pre_outputs[0]))]
 
