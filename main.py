@@ -60,7 +60,7 @@ except FileExistsError:
             os.unlink(os.path.join(root, f))
 # flags and changeable elements
 flag_i = 1  # italic flag
-flag_b = 1  # bold flag
+flag_b = 0  # bold flag
 mean_range = 4  # best possible choosed
 flag_geometric_mean = 1
 flag_mean = 0
@@ -368,7 +368,7 @@ def selection(contours_sel):
         xs, ys, ws, hs = cv2.boundingRect(cs)
         found_best.append(cs)
         # if w < 10 or h < 5:
-            # found_letter[iter2].
+            # found_letter[iter2]
         for ds in contours_sel:
             iter2 = iter2 + 1
             if iter1 == iter2:
@@ -387,8 +387,8 @@ def rev_selection(r_contours_sel):
         iter2 = 0
         xs, ys, ws, hs = cv2.boundingRect(cs)
         found_best_r.append(cs)
-        #if w < 10 or h < 5:
-            #found_letter.pop()
+        # if w < 10 or h < 5:
+            # found_letter.pop()
         for ds in r_contours_sel:
             iter2 = iter2 + 1
             if iter1 == iter2:
@@ -442,44 +442,50 @@ cv2.imwrite('try1.png', text_only)
 regions, _ = mser.detectRegions(gray_pic2)
 
 bounding_boxes = [cv2.boundingRect(p.reshape(-1, 1, 2)) for p in regions]
-#cv2.imwrite('try2.png', bounding_boxes)
+# cv2.imwrite('try2.png', bounding_boxes)
 # creating vectors for output
-pre_output_0 = []
-pre_output_1 = []
-pre_output_2 = []
-pre_output_3 = []
-pre_output_4 = []
-pre_output_5 = []
-pre_output_6 = []
-pre_output_7 = []
-pre_output_8 = []
-pre_output_9 = []
-pre_output_10 = []
-pre_output_11 = []
-pre_output_12 = []
-pre_output_13 = []
-pre_output_14 = []
-pre_output_15 = []
-pre_output_16 = []
-pre_output_17 = []
-pre_output_18 = []
-pre_output_19 = []
-pre_output_20 = []
-pre_output_21 = []
-pre_output_22 = []
-pre_output_23 = []
-pre_output_24 = []
-pre_output_25 = []
-pre_output_26 = []
-pre_output_27 = []
-pre_output_28 = []
-pre_output_29 = []
-pre_output_30 = []
-pre_output_31 = []
-pre_output_32 = []
-pre_output_33 = []
-pre_output_34 = []
-pre_output_35 = []
+pre_output_000 = []    # brisk arial
+pre_output_001 = []    # brisk times new roman
+pre_output_002 = []    # brisk courier new
+pre_output_003 = []    # brisk calibri
+pre_output_004 = []    # brisk comic sans
+pre_output_005 = []    # brisk alef
+
+pre_output_100 = []    # kaze arial
+pre_output_101 = []    # kaze times new roman
+pre_output_102 = []    # kaze courier new
+pre_output_103 = []    # kaze calibri
+pre_output_104 = []    # kaze comic sans
+pre_output_105 = []    # kaze alef
+
+pre_output_200 = []   # brisk arial italic
+pre_output_201 = []   # brisk times new roman italic
+pre_output_202 = []   # brisk courier new italic
+pre_output_203 = []   # brisk calibri italic
+pre_output_204 = []   # brisk comic sans italic
+pre_output_205 = []   # brisk alef italic
+
+pre_output_300 = []   # kaze arial italic
+pre_output_301 = []   # kaze times new roman italic
+pre_output_302 = []   # kaze courier new italic
+pre_output_303 = []   # kaze calibri italic
+pre_output_304 = []   # kaze comic sans italic
+pre_output_305 = []   # kaze alef italic
+
+pre_output_400 = []   # brisk arial bold
+pre_output_401 = []   # brisk times new roman bold
+pre_output_402 = []   # brisk courier new bold
+pre_output_403 = []   # brisk calibri bold
+pre_output_404 = []   # brisk comic sans bold
+pre_output_405 = []   # brisk alef bold
+
+pre_output_500 = []   # kaze arial bold
+pre_output_501 = []   # kaze times new roman bold
+pre_output_502 = []   # kaze courier new bold
+pre_output_503 = []   # kaze calibri bold
+pre_output_504 = []   # kaze comic sans bold
+pre_output_505 = []   # kaze alef bold
+
 
 program_output = []
 
@@ -550,14 +556,12 @@ def check_if(pre_output_list, method_list, alphabet_list):
         pass
 
 
-
-
 number_of_found_letters_v2 = len(found_letter_v2)  # number of found shapes
 print("OCR have found ", number_of_found_letters_v2, " letters")
 # main part of program
 for fl in found_letter_pad:
 
-    #x, y, w, h = cv2.boundingRect(fl)
+    # x, y, w, h = cv2.boundingRect(fl)
     k = k + 1
     '''
     im = gray[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]  # cutting shapes from input image
@@ -565,7 +569,7 @@ for fl in found_letter_pad:
     im2 = cv2.imread('found_v2/found_letter_' + str(k) + '.png')
     im = Image.fromarray(im)
     '''
-    #def resize_with_pad_v2(image, target_width, target_height):  # function adding pads to found shapes
+    # def resize_with_pad_v2(image, target_width, target_height):  # function adding pads to found shapes
     '''
     background = Image.new('RGBA', (target_width, target_height), (255, 255, 255, 255))
     offset = (round((target_width - image.width) / 2), round((target_height - image.height) / 2))
@@ -784,44 +788,44 @@ for fl in found_letter_pad:
             alphabets_iterator = alphabets_iterator + 1
 
         if iterator == 25:
-            check_if(pre_output_0, distances_brisk[0], distances_brisk_a)
-            check_if(pre_output_1, distances_brisk[1], distances_brisk_tnr)
-            check_if(pre_output_2, distances_brisk[2], distances_brisk_cn)
-            check_if(pre_output_3, distances_brisk[3], distances_brisk_c)
-            check_if(pre_output_4, distances_brisk[4], distances_brisk_cs)
-            check_if(pre_output_30, distances_brisk[5], distances_brisk_al)
-            check_if(pre_output_5, distances_kaze[0], distances_kaze_a)
-            check_if(pre_output_6, distances_kaze[1], distances_kaze_tnr)
-            check_if(pre_output_7, distances_kaze[2], distances_kaze_cn)
-            check_if(pre_output_8, distances_kaze[3], distances_kaze_c)
-            check_if(pre_output_9, distances_kaze[4], distances_kaze_cs)
-            check_if(pre_output_31, distances_kaze[5], distances_kaze_al)
+            check_if(pre_output_000, distances_brisk[0], distances_brisk_a)
+            check_if(pre_output_001, distances_brisk[1], distances_brisk_tnr)
+            check_if(pre_output_002, distances_brisk[2], distances_brisk_cn)
+            check_if(pre_output_003, distances_brisk[3], distances_brisk_c)
+            check_if(pre_output_004, distances_brisk[4], distances_brisk_cs)
+            check_if(pre_output_005, distances_brisk[5], distances_brisk_al)
+            check_if(pre_output_100, distances_kaze[0], distances_kaze_a)
+            check_if(pre_output_101, distances_kaze[1], distances_kaze_tnr)
+            check_if(pre_output_102, distances_kaze[2], distances_kaze_cn)
+            check_if(pre_output_103, distances_kaze[3], distances_kaze_c)
+            check_if(pre_output_104, distances_kaze[4], distances_kaze_cs)
+            check_if(pre_output_105, distances_kaze[5], distances_kaze_al)
             if flag_i == 1:
-                check_if(pre_output_10, distances_brisk[6], distances_brisk_a_i)
-                check_if(pre_output_11, distances_brisk[7], distances_brisk_tnr_i)
-                check_if(pre_output_12, distances_brisk[8], distances_brisk_cn_i)
-                check_if(pre_output_13, distances_brisk[9], distances_brisk_c_i)
-                check_if(pre_output_14, distances_brisk[10], distances_brisk_cs_i)
-                check_if(pre_output_32, distances_brisk[11], distances_brisk_al)
-                check_if(pre_output_15, distances_kaze[6], distances_kaze_a_i)
-                check_if(pre_output_16, distances_kaze[7], distances_kaze_tnr_i)
-                check_if(pre_output_17, distances_kaze[8], distances_kaze_cn_i)
-                check_if(pre_output_18, distances_kaze[9], distances_kaze_c_i)
-                check_if(pre_output_19, distances_kaze[10], distances_kaze_cs_i)
-                check_if(pre_output_33, distances_kaze[11], distances_kaze_al_i)
+                check_if(pre_output_200, distances_brisk[6], distances_brisk_a_i)
+                check_if(pre_output_201, distances_brisk[7], distances_brisk_tnr_i)
+                check_if(pre_output_202, distances_brisk[8], distances_brisk_cn_i)
+                check_if(pre_output_203, distances_brisk[9], distances_brisk_c_i)
+                check_if(pre_output_204, distances_brisk[10], distances_brisk_cs_i)
+                check_if(pre_output_205, distances_brisk[11], distances_brisk_al)
+                check_if(pre_output_300, distances_kaze[6], distances_kaze_a_i)
+                check_if(pre_output_301, distances_kaze[7], distances_kaze_tnr_i)
+                check_if(pre_output_302, distances_kaze[8], distances_kaze_cn_i)
+                check_if(pre_output_303, distances_kaze[9], distances_kaze_c_i)
+                check_if(pre_output_304, distances_kaze[10], distances_kaze_cs_i)
+                check_if(pre_output_305, distances_kaze[11], distances_kaze_al_i)
             if flag_b == 1:
-                check_if(pre_output_20, distances_brisk[12], distances_brisk_a_b)
-                check_if(pre_output_21, distances_brisk[13], distances_brisk_tnr_b)
-                check_if(pre_output_22, distances_brisk[14], distances_brisk_cn_b)
-                check_if(pre_output_23, distances_brisk[15], distances_brisk_c_b)
-                check_if(pre_output_24, distances_brisk[16], distances_brisk_cs_b)
-                check_if(pre_output_34, distances_brisk[17], distances_brisk_al_b)
-                check_if(pre_output_25, distances_kaze[12], distances_kaze_a_b)
-                check_if(pre_output_26, distances_kaze[13], distances_kaze_tnr_b)
-                check_if(pre_output_27, distances_kaze[14], distances_kaze_cn_b)
-                check_if(pre_output_28, distances_kaze[15], distances_kaze_c_b)
-                check_if(pre_output_29, distances_kaze[16], distances_kaze_cs_b)
-                check_if(pre_output_35, distances_kaze[17], distances_kaze_al_b)
+                check_if(pre_output_400, distances_brisk[12], distances_brisk_a_b)
+                check_if(pre_output_401, distances_brisk[13], distances_brisk_tnr_b)
+                check_if(pre_output_402, distances_brisk[14], distances_brisk_cn_b)
+                check_if(pre_output_403, distances_brisk[15], distances_brisk_c_b)
+                check_if(pre_output_404, distances_brisk[16], distances_brisk_cs_b)
+                check_if(pre_output_405, distances_brisk[17], distances_brisk_al_b)
+                check_if(pre_output_500, distances_kaze[12], distances_kaze_a_b)
+                check_if(pre_output_501, distances_kaze[13], distances_kaze_tnr_b)
+                check_if(pre_output_502, distances_kaze[14], distances_kaze_cn_b)
+                check_if(pre_output_503, distances_kaze[15], distances_kaze_c_b)
+                check_if(pre_output_504, distances_kaze[16], distances_kaze_cs_b)
+                check_if(pre_output_505, distances_kaze[17], distances_kaze_al_b)
         z = z + 1
         # return background.convert('RGB')
 
@@ -830,40 +834,45 @@ for fl in found_letter_pad:
 
 print()
 
-Pre_outputs = [pre_output_0, pre_output_1, pre_output_2, pre_output_3, pre_output_4, pre_output_5, pre_output_6,
-               pre_output_7, pre_output_8, pre_output_9, pre_output_30, pre_output_31]
+Pre_outputs = [pre_output_000, pre_output_001, pre_output_002, pre_output_003, pre_output_004, pre_output_005,
+               pre_output_100, pre_output_101, pre_output_102, pre_output_103, pre_output_104, pre_output_105]
 if flag_i == 1:
-    Pre_outputs.append(pre_output_10)
-    Pre_outputs.append(pre_output_11)
-    Pre_outputs.append(pre_output_12)
-    Pre_outputs.append(pre_output_13)
-    Pre_outputs.append(pre_output_14)
-    Pre_outputs.append(pre_output_15)
-    Pre_outputs.append(pre_output_16)
-    Pre_outputs.append(pre_output_17)
-    Pre_outputs.append(pre_output_18)
-    Pre_outputs.append(pre_output_19)
-    Pre_outputs.append(pre_output_32)
-    Pre_outputs.append(pre_output_33)
+    Pre_outputs2 = [pre_output_200, pre_output_201, pre_output_202, pre_output_203, pre_output_204, pre_output_205,
+                    pre_output_300, pre_output_301, pre_output_302, pre_output_303, pre_output_304, pre_output_305]
+    Pre_outputs = Pre_outputs + Pre_outputs2
+    ''''
+    Pre_outputs.append(pre_output_200)
+    Pre_outputs.append(pre_output_201)
+    Pre_outputs.append(pre_output_202)
+    Pre_outputs.append(pre_output_203)
+    Pre_outputs.append(pre_output_204)
+    Pre_outputs.append(pre_output_205)
+    Pre_outputs.append(pre_output_300)
+    Pre_outputs.append(pre_output_301)
+    Pre_outputs.append(pre_output_302)
+    Pre_outputs.append(pre_output_303)
+    Pre_outputs.append(pre_output_304)
+    Pre_outputs.append(pre_output_305)
+    '''
 if flag_b == 1:
-    Pre_outputs.append(pre_output_20)
-    Pre_outputs.append(pre_output_21)
-    Pre_outputs.append(pre_output_22)
-    Pre_outputs.append(pre_output_23)
-    Pre_outputs.append(pre_output_24)
-    Pre_outputs.append(pre_output_25)
-    Pre_outputs.append(pre_output_26)
-    Pre_outputs.append(pre_output_27)
-    Pre_outputs.append(pre_output_28)
-    Pre_outputs.append(pre_output_29)
-    Pre_outputs.append(pre_output_34)
-    Pre_outputs.append(pre_output_35)
+    Pre_outputs.append(pre_output_400)
+    Pre_outputs.append(pre_output_401)
+    Pre_outputs.append(pre_output_402)
+    Pre_outputs.append(pre_output_403)
+    Pre_outputs.append(pre_output_404)
+    Pre_outputs.append(pre_output_405)
+    Pre_outputs.append(pre_output_500)
+    Pre_outputs.append(pre_output_501)
+    Pre_outputs.append(pre_output_502)
+    Pre_outputs.append(pre_output_503)
+    Pre_outputs.append(pre_output_504)
+    Pre_outputs.append(pre_output_505)
 
 Semi_final_output = [[] * len(Pre_outputs) for i in range(len(Pre_outputs[0]))]
 
 Final_output = []
 
-for iterator_z in range(len(pre_output_0)):
+for iterator_z in range(len(pre_output_000)):
     for output in Pre_outputs:
         try:
             Semi_final_output[iterator_z].append(output[iterator_z])
