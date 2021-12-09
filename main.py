@@ -59,7 +59,7 @@ except FileExistsError:
         for f in files:
             os.unlink(os.path.join(root, f))
 # flags and changeable elements
-flag_i = 1  # italic flag
+flag_i = 0  # italic flag
 flag_b = 0  # bold flag
 mean_range = 4  # best possible choosed
 flag_geometric_mean = 1
@@ -175,182 +175,6 @@ ret, binary = cv2.threshold(gray, threshold, 255, cv2.THRESH_OTSU)
 inverted_binary = ~binary
 contours, hierarchy = cv2.findContours(inverted_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-'''
-ret, mask = cv2.threshold(gray, 255, 50, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-kernel = np.ones((9,9), np.uint8)
-mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-
-# put mask into alpha channel of result
-result = no_gray.copy()
-result = cv2.cvtColor(result, cv2.COLOR_BGR2BGRA)
-result[:, :, 3] = mask
-
-# save resulting masked image
-cv2.imwrite('retina_masked.png', result)
-'''
-
-'''
-def get_grayscale(image):
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-
-# noise removal
-def remove_noise(image):
-    return cv2.medianBlur(image, 5)
-
-
-# thresholding
-def thresholding(image):
-    return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-
-
-# dilation
-def dilate(image):
-    kernel = np.ones((5, 5), np.uint8)
-    return cv2.dilate(image, kernel, iterations=1)
-
-
-# erosion
-def erode(image):
-    kernel = np.ones((5, 5), np.uint8)
-    return cv2.erode(image, kernel, iterations=1)
-
-
-# opening - erosion followed by dilation
-def opening(image):
-    kernel = np.ones((5, 5), np.uint8)
-    return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
-
-
-# canny edge detection
-def canny(image):
-    return cv2.Canny(image, 100, 200)
-
-
-# skew correction
-def deskew(image):
-    coords = np.column_stack(np.where(image > 0))
-    angle = cv2.minAreaRect(coords)[-1]
-    if angle < -45:
-        angle = -(90 + angle)
-    else:
-        angle = -angle
-    (h, w) = image.shape[:2]
-    center = (w // 2, h // 2)
-    M = cv2.getRotationMatrix2D(center, angle, 1.0)
-    rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-    return rotated
-
-
-# template matching
-def match_template(image, template):
-    return cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
-
-
-gray = get_grayscale(image)
-thresh = thresholding(gray)
-opening = opening(gray)
-canny = canny(gray)
-'''
-'''
-def segmentation(gray2):  # image segmentation
-    rng.seed(12345)
-    try:
-        gray2[np.all(gray2 == 255, axis=2)] = 0  # Change the background from white to black, it will help later to extract
-    except:
-        gray2 = gray2
-    # cv2.imshow('Black Background Image', gray2)
-    cv2.imwrite('segmentation/Black Background Image.png', gray2)
-    # cv2.waitKey(0)
-    kernel = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]],
-                      dtype=np.float32)  # Kernel sharpening, approximation of second derivative
-    img_laplacian = cv2.filter2D(gray2, cv2.CV_32F, kernel)  # do the laplacian filtering
-    sharp = np.float32(gray2)
-    img_result = sharp - img_laplacian
-    img_result = np.clip(img_result, 0, 255)  # convert back to 8bits gray scale
-    img_result = img_result.astype('uint8')
-    img_laplacian = np.clip(img_laplacian, 0, 255)
-    img_laplacian = np.uint8(img_laplacian)
-    # cv2.imshow('New Sharped Image', img_result)
-    cv2.imwrite('segmentation/New Sharped Image.png', img_result)
-    # cv2.waitKey(0)
-    bw = cv2.cvtColor(img_result, cv2.COLOR_BGR2GRAY)  # Create binary image from source image
-    _, bw = cv2.threshold(bw, threshold, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    # cv2.imshow('Binary Image', bw)
-    cv2.imwrite('segmentation/Binary Image.png', bw)
-    # cv2.waitKey(0)
-    dist = cv2.distanceTransform(bw, cv2.DIST_L2, 3)  # Perform the distance transform algorithm
-    cv2.normalize(dist, dist, 0, 1.0, cv2.NORM_MINMAX)  # Normalize the distance image for range = {0.0, 1.0}
-    # cv2.imshow('Distance Transform Image', dist)
-    cv2.imwrite('segmentation/Distance Transform Image.png', dist)
-    # cv2.waitKey(0)
-    _, dist = cv2.threshold(dist, threshold, 255,
-                            cv2.THRESH_BINARY)  # Threshold, obtain the peaks, markers of foreground objects
-    kernel1 = np.ones((3, 3), dtype=np.uint8)
-    dist = cv2.dilate(dist, kernel1)  # Dilate a bit the dist image
-    # cv2.imshow('Peaks', dist)
-    cv2.imwrite('segmentation/Peaks.png', dist)
-    # cv2.waitKey(0)
-    dist_8u = dist.astype('uint8')  # Create the CV_8U version of the distance image, needed for findContours()
-    contours, _ = cv2.findContours(dist_8u, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # Find total markers
-    markers = np.zeros(dist.shape, dtype=np.int32)  # Create the marker image for the watershed algorithm
-    for i in range(len(contours)):
-        cv2.drawContours(markers, contours, i, (i + 1), -1)  # Draw the foreground markers
-    cv2.circle(markers, (5, 5), 3, (255, 255, 255), -1)  # Draw the background marker
-    markers_8u = (markers * 10).astype('uint8')
-    # cv2.imshow('Markers', markers_8u)
-    cv2.imwrite('segmentation/Markers.png', markers_8u)
-    # cv2.waitKey(0)
-    cv2.watershed(img_result, markers)  # Perform the watershed algorithm
-    mark = np.zeros(markers.shape, dtype=np.uint8)
-    mark = markers.astype('uint8')
-    mark = cv2.bitwise_not(mark)
-    # cv2.imshow('Markers_v2', mark)
-    cv2.imwrite('segmentation/Markers_v2.png', mark)
-    # cv2.waitKey(0)
-    colors = []
-    for contour in contours:
-        colors.append((rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256)))  # Generate random colors
-    dst = np.zeros((markers.shape[0], markers.shape[1], 3), dtype=np.uint8)  # Create the result image
-    for i in range(markers.shape[0]):
-        for j in range(markers.shape[1]):
-            index = markers[i, j]
-            if 0 < index <= len(contours):
-                dst[i, j, :] = colors[index - 1]  # Fill labeled objects with random colors
-    # cv2.imshow('Final Result', dst)
-    # cv2.waitKey(0)
-    dst[np.all(dst == 0, axis=2)] = 255
-    cv2.imwrite('segmentation/Final result of segmentation.png', dst)
-    for c in contours:
-        for i in range(markers.shape[0]):
-            for j in range(markers.shape[1]):
-                index = markers[i, j]
-                if 0 < index <= len(contours):
-                    pass
-                else:
-                    dst[i, j, :] = 255
-        img = Image.open('test3.png')
-        imga = img.convert("RGBA")
-        data_s = imga.getdata()
-        new_data = []
-        for item in data_s:
-            if item[0] == 255 and item[1] == 255 and item[2] == 255:
-                new_data.append((255, 255, 255, 0))
-            else:
-                new_data.append(item)
-        img.putdata(new_data)
-        new_img = Image.new('RGBA', (700, 440), (255, 255, 255, 0))
-        dst = Image.fromarray(dst)
-        dst.paste(img, new_img)
-        dst.save('Final Result_x.png')
-        dst = cv2.imread('Final Result_x.png')
-        cv2.imshow('Final Result_x.png', dst)
-        cv2.waitKey(0)
-
-
-segmentation(no_gray)
-'''
 # deleting shapes included in bigger ones
 k = 0
 found_letter = []
@@ -403,7 +227,7 @@ def rev_selection(r_contours_sel):
 pic1 = no_gray
 selection(found_letter)
 number_of_found_letters = len(found_best)  # number of found shapes
-print("OCR have found ", number_of_found_letters, " letters")
+print("OCR 1 have found ", number_of_found_letters, " letters")
 found_better = []
 
 for c in found_best:
@@ -415,7 +239,23 @@ for c in found_best:
         found_better.pop()
 cv2.imwrite('All contours with bounding box.png', pic1)
 number_of_found_letters = len(found_better)  # number of found shapes
-print("OCR have found ", number_of_found_letters, " letters")
+print("OCR 2 have found ", number_of_found_letters, " letters")
+
+x_min = 0
+x_max = 0
+y_min = 0
+y_max = 0
+
+
+for c in found_better:
+    (x, y, w, h) = cv2.boundingRect(c)
+    print('x:' + str(x) + ' y:' + str(y) + ' w:' + str(w) + ' h:' + str(h))
+    x_ = x
+    x_ = x + w
+    y_ = y
+    y_ = y + h
+    if
+
 
 
 mser = cv2.MSER_create()
@@ -509,45 +349,11 @@ for c in found_better:
     im = gray[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]  # cutting shapes from input image
     cv2.imwrite('found/found_letter_' + str(p) + '.png', im)
 
-
-    '''
-    mask = np.zeros(im.shape[:3], dtype=np.uint8)
-
-    # loop through the contours
-    for i, cnt in enumerate(contours):
-        # if the contour has no other contours inside of it
-        if hierarchy[0][i][2] == -1:
-            # if the size of the contour is greater than a threshold
-            if cv2.contourArea(cnt) > 10:
-                cv2.drawContours(mask, [cnt], 0, 255, -1)
-    mask = ~mask
-    '''
-    '''
-    im = ~im
-    ret, mask = cv2.threshold(im, 245, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    kernel = np.zeros((0, 0), np.uint8)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    result = im.copy()
-    result = cv2.cvtColor(result, cv2.COLOR_BGR2BGRA)
-    result[:, :, 3] = mask
-    cv2.imwrite('croped/found_letter_' + str(p) + '.png', result)
-    result = ~result
-    found_letter_v2.append(result)
-    '''
     im = Image.fromarray(im)
     # result = Image.fromarray(result)
     im2 = cv2.imread('found/found_letter_' + str(p) + '.png')
 
     resize_with_pad(im, w + 40, h + 40, p)
-'''
-for flp in found_letter_pad:
-    segmentation(flp)
-
-for c in contours:
-    found_letter_v2.append(c)
-'''
-
 
 def check_if(pre_output_list, method_list, alphabet_list):
     try:
@@ -557,25 +363,15 @@ def check_if(pre_output_list, method_list, alphabet_list):
 
 
 number_of_found_letters_v2 = len(found_letter_v2)  # number of found shapes
-print("OCR have found ", number_of_found_letters_v2, " letters")
+print("OCR 3 have found ", number_of_found_letters_v2, " letters")
 # main part of program
 for fl in found_letter_pad:
 
     # x, y, w, h = cv2.boundingRect(fl)
     k = k + 1
-    '''
-    im = gray[y - height_pad:y + h + height_pad, x - width_pad:x + w + width_pad]  # cutting shapes from input image
-    cv2.imwrite('found_v2/found_letter_' + str(k) + '.png', im)
-    im2 = cv2.imread('found_v2/found_letter_' + str(k) + '.png')
-    im = Image.fromarray(im)
-    '''
+
     # def resize_with_pad_v2(image, target_width, target_height):  # function adding pads to found shapes
-    '''
-    background = Image.new('RGBA', (target_width, target_height), (255, 255, 255, 255))
-    offset = (round((target_width - image.width) / 2), round((target_height - image.height) / 2))
-    background.paste(image, offset)
-    background.save('found_pad_v2/found_letter_pad_' + str(k) + '.png')
-    '''
+
     z = 0  # iterator for naming images containing matches
     distances_kaze_a = []
     distances_kaze_tnr = []
@@ -840,33 +636,9 @@ if flag_i == 1:
     Pre_outputs2 = [pre_output_200, pre_output_201, pre_output_202, pre_output_203, pre_output_204, pre_output_205,
                     pre_output_300, pre_output_301, pre_output_302, pre_output_303, pre_output_304, pre_output_305]
     Pre_outputs = Pre_outputs + Pre_outputs2
-    ''''
-    Pre_outputs.append(pre_output_200)
-    Pre_outputs.append(pre_output_201)
-    Pre_outputs.append(pre_output_202)
-    Pre_outputs.append(pre_output_203)
-    Pre_outputs.append(pre_output_204)
-    Pre_outputs.append(pre_output_205)
-    Pre_outputs.append(pre_output_300)
-    Pre_outputs.append(pre_output_301)
-    Pre_outputs.append(pre_output_302)
-    Pre_outputs.append(pre_output_303)
-    Pre_outputs.append(pre_output_304)
-    Pre_outputs.append(pre_output_305)
-    '''
 if flag_b == 1:
-    Pre_outputs.append(pre_output_400)
-    Pre_outputs.append(pre_output_401)
-    Pre_outputs.append(pre_output_402)
-    Pre_outputs.append(pre_output_403)
-    Pre_outputs.append(pre_output_404)
-    Pre_outputs.append(pre_output_405)
-    Pre_outputs.append(pre_output_500)
-    Pre_outputs.append(pre_output_501)
-    Pre_outputs.append(pre_output_502)
-    Pre_outputs.append(pre_output_503)
-    Pre_outputs.append(pre_output_504)
-    Pre_outputs.append(pre_output_505)
+    Pre_outputs3 = [pre_output_400, pre_output_401, pre_output_402, pre_output_403, pre_output_404, pre_output_405,
+                    pre_output_500, pre_output_501, pre_output_502, pre_output_503, pre_output_504, pre_output_505]
 
 Semi_final_output = [[] * len(Pre_outputs) for i in range(len(Pre_outputs[0]))]
 
