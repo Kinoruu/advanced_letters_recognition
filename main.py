@@ -6,8 +6,7 @@ import os
 import letters_import
 # import operator
 # import time
-import random as rng
-import argparse
+
 
 # creating or cleaning directories
 try:
@@ -260,16 +259,16 @@ for c in found_better:
     y_d = y
     y_u = y + h
     if ((y_min >= y_d and y_max <= y_u) or (y_min <= y_d and y_max >= y_u) or
-        (y_min >= y_d and (y_max >= y_u >= y_min)) or (y_min <= y_d and (y_u >= y_max >= y_d)) or
-        (y_max <= y_u and (y_max >= y_d >= y_min)) or (y_max >= y_u and (y_u >= y_min >= y_d))):
-        if y_min < y_d:
+            (y_min >= y_d and (y_max >= y_u >= y_min)) or (y_min <= y_d and (y_u >= y_max >= y_d)) or
+            (y_max <= y_u and (y_max >= y_d >= y_min)) or (y_max >= y_u and (y_u >= y_min >= y_d))):
+        if y_min > y_d:
             y_min = y_d
-        if y_max > y_u:
+        if y_max < y_u:
             y_max = y_u
         counter_of_contours_in_line += 1
     else:
         # print(str(y_min) + ' ' + str(y_max) + ' ' + str(counter_of_contours_in_line))
-        column = [[y_min],[y_max],[counter_of_contours_in_line + 1]]
+        column = [[y_min], [y_max], [counter_of_contours_in_line + 1]]
         info = np.append(info, column, axis=1)
         y_min = 0
         y_max = image_height
