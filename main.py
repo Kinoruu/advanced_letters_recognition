@@ -241,22 +241,56 @@ cv2.imwrite('All contours with bounding box.png', pic1)
 number_of_found_letters = len(found_better)  # number of found shapes
 print("OCR 2 have found ", number_of_found_letters, " letters")
 
+image_height, image_width = gray.shape
+
 x_min = 0
-x_max = 0
+x_max = image_width
 y_min = 0
-y_max = 0
+y_max = image_height
+info = [[], [], []]
+counter_of_contours_in_line = 0
+counter_of_lines = 0
 
 
 for c in found_better:
     (x, y, w, h) = cv2.boundingRect(c)
     print('x:' + str(x) + ' y:' + str(y) + ' w:' + str(w) + ' h:' + str(h))
-    x_ = x
-    x_ = x + w
-    y_ = y
-    y_ = y + h
-    if
+    x_l = x
+    x_r = x + w
+    y_d = y
+    y_u = y + h
+    if ((y_min >= y_d and y_max <= y_u) or (y_min <= y_d and y_max >= y_u) or
+        (y_min >= y_d and (y_max >= y_u >= y_min)) or (y_min <= y_d and (y_u >= y_max >= y_d)) or
+        (y_max <= y_u and (y_max >= y_d >= y_min)) or (y_max >= y_u and (y_u >= y_min >= y_d))):
+        if y_min < y_d:
+            y_min = y_d
+        if y_max > y_u:
+            y_max = y_u
+        counter_of_contours_in_line += 1
+    else:
+        # print(str(y_min) + ' ' + str(y_max) + ' ' + str(counter_of_contours_in_line))
+        column = [[y_min],[y_max],[counter_of_contours_in_line + 1]]
+        info = np.append(info, column, axis=1)
+        y_min = 0
+        y_max = image_height
+        counter_of_contours_in_line = 0
+    print(str(y_min) + ' ' + str(y_max) + ' ' + str(counter_of_contours_in_line))
+column = [[y_min],[y_max],[counter_of_contours_in_line]]
+info = np.append(info, column, axis=1)
+print(info)
 
-
+pic3 = no_gray
+for c in found_better:
+    iteratorx = int(info[2][counter_of_lines])
+    y_min_ = info[0][counter_of_lines]
+    y_max_ = info[1][counter_of_lines]
+    print(iteratorx)
+    x, y, w, h = cv2.boundingRect(c)
+    cv2.rectangle(pic3, (x, int(y_min_)), (x + w, int(y_max_)), (77, 22, 174), 2)
+    info[2][counter_of_lines] -= 1
+    if iteratorx == 0:
+        counter_of_lines += 1
+cv2.imwrite('All contours with bounding box after normalization.png', pic1)
 
 mser = cv2.MSER_create()
 gray_pic2 = cv2.cvtColor(pic2, cv2.COLOR_BGR2GRAY)
