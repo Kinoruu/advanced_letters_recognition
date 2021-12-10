@@ -244,8 +244,8 @@ image_height, image_width = gray.shape
 
 x_min = 0
 x_max = image_width
-y_min = 0
-y_max = image_height
+y_min = image_height
+y_max = 0
 info = [[], [], []]
 counter_of_contours_in_line = 0
 counter_of_lines = 0
@@ -253,7 +253,7 @@ counter_of_lines = 0
 
 for c in found_better:
     (x, y, w, h) = cv2.boundingRect(c)
-    print('x:' + str(x) + ' y:' + str(y) + ' w:' + str(w) + ' h:' + str(h))
+    print('elem  y:' + str(y) + ' y + h:' + str(y + h))
     x_l = x
     x_r = x + w
     y_d = y
@@ -268,13 +268,13 @@ for c in found_better:
         counter_of_contours_in_line += 1
     else:
         # print(str(y_min) + ' ' + str(y_max) + ' ' + str(counter_of_contours_in_line))
-        column = [[y_min], [y_max], [counter_of_contours_in_line + 1]]
+        column = [[y_min], [y_max], [counter_of_contours_in_line-1]]
         info = np.append(info, column, axis=1)
-        y_min = 0
-        y_max = image_height
-        counter_of_contours_in_line = 0
-    print(str(y_min) + ' ' + str(y_max) + ' ' + str(counter_of_contours_in_line))
-column = [[y_min],[y_max],[counter_of_contours_in_line]]
+        y_min = image_height
+        y_max = 0
+        counter_of_contours_in_line = 1
+    print('last  y:' + str(y_min) + ' y + h:' + str(y_max) + ' ' + str(counter_of_contours_in_line))
+column = [[y_min],[y_max],[counter_of_contours_in_line-1]]
 info = np.append(info, column, axis=1)
 print(info)
 
@@ -285,7 +285,7 @@ for c in found_better:
     y_max_ = info[1][counter_of_lines]
     print(iteratorx)
     x, y, w, h = cv2.boundingRect(c)
-    cv2.rectangle(pic3, (x, int(y_min_)), (x + w, int(y_max_)), (77, 22, 174), 2)
+    cv2.rectangle(pic3, (x, int(y_min_)), (x + w, int(y_max_)), (65, 145, 74), 1)
     info[2][counter_of_lines] -= 1
     if iteratorx == 0:
         counter_of_lines += 1
