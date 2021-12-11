@@ -8,55 +8,42 @@ import letters_import
 # import time
 
 
-# creating or cleaning directories
-try:
-    os.mkdir('found')
-except FileExistsError:
-    for root, dirs, files in os.walk('found'):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-try:
-    os.mkdir('found_v2')
-except FileExistsError:
-    for root, dirs, files in os.walk('found_v2'):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-try:
-    os.mkdir('found_pad')
-except FileExistsError:
-    for root, dirs, files in os.walk('found_pad'):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-try:
-    os.mkdir('found_pad_v2')
-except FileExistsError:
-    for root, dirs, files in os.walk('found_pad_v2'):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-try:
-    os.mkdir('kaze')
-except FileExistsError:
-    for root, dirs, files in os.walk('kaze'):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-try:
-    os.mkdir('brisk')
-except FileExistsError:
-    for root, dirs, files in os.walk('brisk'):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-try:
-    os.mkdir('segmentation')
-except FileExistsError:
-    for root, dirs, files in os.walk('segmentation'):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-try:
-    os.mkdir('croped')
-except FileExistsError:
-    for root, dirs, files in os.walk('croped'):
-        for f in files:
-            os.unlink(os.path.join(root, f))
+def create_dirs_and_clear_folders():
+    try: os.mkdir('found')
+    except FileExistsError:
+        for root, dirs, files in os.walk('found'):
+            for f in files: os.unlink(os.path.join(root, f))
+    try: os.mkdir('found_v2')
+    except FileExistsError:
+        for root, dirs, files in os.walk('found_v2'):
+            for f in files: os.unlink(os.path.join(root, f))
+    try: os.mkdir('found_pad')
+    except FileExistsError:
+        for root, dirs, files in os.walk('found_pad'):
+            for f in files: os.unlink(os.path.join(root, f))
+    try: os.mkdir('found_pad_v2')
+    except FileExistsError:
+        for root, dirs, files in os.walk('found_pad_v2'):
+            for f in files: os.unlink(os.path.join(root, f))
+    try: os.mkdir('kaze')
+    except FileExistsError:
+        for root, dirs, files in os.walk('kaze'):
+            for f in files: os.unlink(os.path.join(root, f))
+    try: os.mkdir('brisk')
+    except FileExistsError:
+        for root, dirs, files in os.walk('brisk'):
+            for f in files: os.unlink(os.path.join(root, f))
+    try: os.mkdir('segmentation')
+    except FileExistsError:
+        for root, dirs, files in os.walk('segmentation'):
+            for f in files: os.unlink(os.path.join(root, f))
+    try: os.mkdir('croped')
+    except FileExistsError:
+        for root, dirs, files in os.walk('croped'):
+            for f in files: os.unlink(os.path.join(root, f))
+
+
+create_dirs_and_clear_folders()
 # flags and changeable elements
 flag_i = 0  # italic flag
 flag_b = 0  # bold flag
@@ -708,3 +695,4 @@ for letter_x in range(len(Final_output)):
     print(Final_output[letter_x], sep=' ', end='', flush=True)
     text_file.write(Final_output[letter_x])
 '''
+create_dirs_and_clear_folders()
